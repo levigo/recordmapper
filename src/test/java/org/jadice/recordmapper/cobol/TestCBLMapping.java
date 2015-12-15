@@ -1,6 +1,7 @@
 package org.jadice.recordmapper.cobol;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +16,9 @@ import org.jadice.recordmapper.MappingException;
 import org.jadice.recordmapper.MappingFactory;
 import org.jadice.recordmapper.Marshaller;
 import org.jadice.recordmapper.Unmarshaller;
+import org.jadice.recordmapper.cobol.TAnyOuter.EmptyNestedElement;
+import org.jadice.recordmapper.cobol.TAnyOuter.NameOnlyNestedElement;
+import org.jadice.recordmapper.cobol.TAnyOuter.NameValueNestedElement;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -320,12 +324,11 @@ public class TestCBLMapping {
 
   // ******************************************************
   public enum MyEnumWithCBLValues {
-    @CBLEnumValue("v_foo")
-    FOO, @CBLEnumValue("v_bar")
-    BAR, @CBLEnumValue("v_baz")
-    BAZ, @CBLEnumValue("v_a")
-    A, @CBLEnumValue("v_bb")
-    BB;
+    @CBLEnumValue("v_foo") FOO,
+    @CBLEnumValue("v_bar") BAR,
+    @CBLEnumValue("v_baz") BAZ,
+    @CBLEnumValue("v_a") A,
+    @CBLEnumValue("v_bb") BB;
   }
 
   @CBLRecord
@@ -601,14 +604,8 @@ public class TestCBLMapping {
 
     final MyTestClass2 tc = new MyTestClass2();
 
-    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    m.marshal(tc, baos);
-
-    final String encoded = new String(baos.toByteArray());
-
-    Assert.assertEquals(
-        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0000000000000000000000.0",
-        encoded);
+    final ByteArrayOutputStream baos = marshalAndVerify(m, tc,
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0000000000000000000000.0");
 
     final MyTestClass2 tcu = u.unmarshal(MyTestClass2.class, new ByteArrayInputStream(baos.toByteArray()));
 
@@ -629,6 +626,17 @@ public class TestCBLMapping {
 
     Assert.assertEquals(tcu.mydouble, 0d, .0001);
     Assert.assertEquals(tcu.myDouble, new Double(0));
+  }
+
+  ByteArrayOutputStream marshalAndVerify(final Marshaller m, final Object target, String expected)
+      throws MappingException {
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    m.marshal(target, baos);
+
+    final String encoded = new String(baos.toByteArray());
+
+    Assert.assertEquals(expected, encoded);
+    return baos;
   }
 
   // *****************************************
@@ -653,5 +661,56 @@ public class TestCBLMapping {
       Assert.assertTrue(e.getMessage().contains(
           "Length of value 4711 for field int org.jadice.recordmapper.cobol.TestCBLMapping$MyTestClass3.foo exceeds allowed length(3)"));
     }
+  }
+
+  @Test
+  public void testAnyMappingMarshalling() throws Exception {
+    final MappingFactory f = MappingFactory.create(TAnyOuter.class);
+
+    final TAnyOuter a1 = new TAnyOuter();
+
+    a1.type = 9;
+    a1.nested = new TAnyOuter.EmptyNestedElement();
+
+    marshalAndVerify(f.createMarshaller(), a1, "0");
+
+    final TAnyOuter a2 = new TAnyOuter();
+    a2.type = 9;
+    final TAnyOuter.NameOnlyNestedElement n = new TAnyOuter.NameOnlyNestedElement();
+    n.name = "foo";
+    a2.nested = n;
+
+    marshalAndVerify(f.createMarshaller(), a2, "1foo       ");
+
+    final TAnyOuter a3 = new TAnyOuter();
+    a3.type = 9;
+    final TAnyOuter.NameValueNestedElement nv = new TAnyOuter.NameValueNestedElement();
+    nv.name = "foo";
+    nv.value = "bar";
+    a3.nested = nv;
+
+    marshalAndVerify(f.createMarshaller(), a3, "2foo       bar       ");
+  }
+
+  @Test
+  public void testAnyMappingUnmarshalling() throws Exception {
+    final MappingFactory f = MappingFactory.create(TAnyOuter.class);
+
+    final TAnyOuter u1 = f.createUnmarshaller().unmarshal(TAnyOuter.class, new ByteArrayInputStream("0".getBytes()));
+    assertEquals(0, u1.type);
+    assertEquals(EmptyNestedElement.class, u1.nested.getClass());
+
+    final TAnyOuter u2 = f.createUnmarshaller().unmarshal(TAnyOuter.class,
+        new ByteArrayInputStream("1foo       ".getBytes()));
+    assertEquals(1, u2.type);
+    assertEquals(NameOnlyNestedElement.class, u2.nested.getClass());
+    assertEquals("foo", ((NameOnlyNestedElement) u2.nested).name);
+
+    final TAnyOuter u3 = f.createUnmarshaller().unmarshal(TAnyOuter.class,
+        new ByteArrayInputStream("2foo       bar       ".getBytes()));
+    assertEquals(2, u3.type);
+    assertEquals(NameValueNestedElement.class, u3.nested.getClass());
+    assertEquals("foo", ((NameValueNestedElement) u3.nested).name);
+    assertEquals("bar", ((NameValueNestedElement) u3.nested).value);
   }
 }
