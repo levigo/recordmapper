@@ -4,11 +4,8 @@ import java.lang.annotation.Annotation;
 
 import org.jadice.recordmapper.MappingException;
 import org.jadice.recordmapper.cobol.CBLCount;
-import org.jadice.recordmapper.cobol.CBLRecordAttributes;
 import org.jadice.recordmapper.impl.FieldMapping;
 import org.jadice.recordmapper.impl.MappingContext;
-import org.jadice.recordmapper.impl.MarshalContext;
-import org.jadice.recordmapper.impl.UnmarshalContext;
 
 public class CBLCountImpl extends CBLNumericImpl {
 	private CBLCount spec;
@@ -39,17 +36,4 @@ public class CBLCountImpl extends CBLNumericImpl {
 		return spec.length();
 	}
 
-	public void marshal(MarshalContext ctx, Object value) throws MappingException {
-		marshal(ctx, //
-				referencedFieldMapping.getCount(ctx),//
-				ctx.getRecordAttributes(CBLRecordAttributes.class).getEndian(), //
-				false);
-	}
-
-	public Object unmarshal(UnmarshalContext ctx) throws MappingException {
-		return unmarshal(ctx, //
-				ctx.getBytes(getSize(ctx)), //
-				ctx.getRecordAttributes(CBLRecordAttributes.class).getEndian(),//
-				false);
-	}
 }

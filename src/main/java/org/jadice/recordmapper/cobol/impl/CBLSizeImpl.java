@@ -34,17 +34,4 @@ public class CBLSizeImpl extends CBLNumericImpl {
 		return spec.length();
 	}
 
-	public void marshal(MarshalContext ctx, Object value) throws MappingException {
-		marshal(ctx, //
-				referencedFieldMapping.getSize(ctx),//
-				ctx.getRecordAttributes(CBLRecordAttributes.class).getEndian(), //
-				false);
-	}
-
-	public Object unmarshal(UnmarshalContext ctx) throws MappingException {
-		return unmarshal(ctx, //
-				ctx.getBytes(getSize(ctx)), //
-				ctx.getRecordAttributes(CBLRecordAttributes.class).getEndian(),//
-				false);
-	}
 }

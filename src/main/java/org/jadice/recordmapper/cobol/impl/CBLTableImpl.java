@@ -18,6 +18,7 @@ import java.util.Vector;
 import org.jadice.recordmapper.MappingException;
 import org.jadice.recordmapper.cobol.CBLFixedLength;
 import org.jadice.recordmapper.cobol.CBLRecord;
+import org.jadice.recordmapper.cobol.CBLTable;
 import org.jadice.recordmapper.impl.FieldMapping;
 import org.jadice.recordmapper.impl.MappingContext;
 import org.jadice.recordmapper.impl.MarshalContext;
@@ -26,7 +27,7 @@ import org.jadice.recordmapper.impl.UnmarshalContext;
 
 public class CBLTableImpl extends FieldMapping {
 
-	// private CBLTable spec;
+	private CBLTable spec;
 
 	private Class<?> collectionType;
 	private Class<?> memberType;
@@ -37,9 +38,11 @@ public class CBLTableImpl extends FieldMapping {
 
 	private int fixedLength = -1;
 
+  private boolean isSizeRef;
+
 	@Override
   protected void init(Annotation a) throws MappingException {
-		// this.spec = (CBLTable) a;
+		this.spec = (CBLTable) a;
 
 		// determine member type
 		collectionType = field.getType();
@@ -84,8 +87,19 @@ public class CBLTableImpl extends FieldMapping {
 
 		memberMapping = recordMapping.getRecordMapping(memberType);
 		if (null == memberMapping)
-			throw new MappingException(this, "XMLMapping for " + memberType
+			throw new MappingException(this, "COBOL-mapping for " + memberType
 					+ " could not be found");
+		
+    if(spec.sizeRef().length() > 0 && spec.countRef().length() > 0) 
+      throw new MappingException(this, "Can have either sizeRef or countRef, but not both");
+
+    if(spec.sizeRef().length() > 0) {
+		  sizeOrCountField = recordMapping.getFieldMapping(spec.sizeRef());
+		  isSizeRef = true;
+		}
+    if(spec.countRef().length() > 0) {
+      sizeOrCountField = recordMapping.getFieldMapping(spec.countRef());
+    }
 	}
 
 	@Override
@@ -135,6 +149,20 @@ public class CBLTableImpl extends FieldMapping {
 	}
 
 	@Override
+	public void beforeMarshal(MarshalContext mc) throws MappingException {
+	  super.beforeMarshal(mc);
+	  
+	  if (sizeOrCountField != null && (sizeOrCountField instanceof CBLNumericImpl || sizeOrCountField instanceof CBLNumericStringImpl)) {
+      final long sc = isSizeRef ? getSize(mc) : getCount(mc);
+      try {
+        sizeOrCountField.getField().setLong(mc.getRecord(), sc);
+      } catch (Exception e) {
+        throw new MappingException(sizeOrCountField, "Can't set size/count", e);
+      }
+    }
+	}
+	
+	@Override
   public Object unmarshal(UnmarshalContext ctx) throws MappingException {
 		int expectedSize = -1;
 		int expectedCount = fixedLength;
@@ -145,6 +173,12 @@ public class CBLTableImpl extends FieldMapping {
 				expectedSize = sc;
 			else if (sizeOrCountField instanceof CBLCountImpl)
 				expectedCount = sc;
+			else if(sizeOrCountField instanceof CBLNumericImpl || sizeOrCountField instanceof CBLNumericStringImpl) {
+			  if(isSizeRef)
+			    expectedSize = sc;
+			  else
+			    expectedCount = sc;
+			}
 		}
 
 		if (expectedSize < 0 && expectedCount < 0)
