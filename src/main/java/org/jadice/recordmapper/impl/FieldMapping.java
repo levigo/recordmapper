@@ -63,4 +63,28 @@ public abstract class FieldMapping extends Mapping {
 	public String toString() {
 	  return "Field: " + field.getName();
 	}
+
+  protected void setIntegerFieldValue(MarshalContext mc, FieldMapping field, final long value) throws MappingException {
+    try {
+      Class<?> t = field.getField().getType();
+      if (Integer.class.isAssignableFrom(t) || int.class.isAssignableFrom(t)) {
+        if (value > Integer.MAX_VALUE)
+          throw new MappingException(field, "Field type Integer is too small to hold the value " + value);
+        field.getField().setInt(mc.getRecord(), (int) value);
+      } else if (Short.class.isAssignableFrom(t) || short.class.isAssignableFrom(t)) {
+        if (value > Short.MAX_VALUE)
+          throw new MappingException(field, "Field type Short is too small to hold the value " + value);
+        field.getField().setShort(mc.getRecord(), (short) value);
+      } else if (Byte.class.isAssignableFrom(t) || byte.class.isAssignableFrom(t)) {
+        if (value > Byte.MAX_VALUE)
+          throw new MappingException(field, "Field type Byte is too small to hold the value " + value);
+        field.getField().setByte(mc.getRecord(), (byte) value);
+      } else if (Long.class.isAssignableFrom(t) || long.class.isAssignableFrom(t)) {
+        field.getField().setLong(mc.getRecord(), value);
+      } else
+        throw new MappingException(field, "Field type is not of type long, int, short or byte");
+    } catch (Exception e) {
+      throw new MappingException(field, "Can't set size/count", e);
+    }
+  }
 }

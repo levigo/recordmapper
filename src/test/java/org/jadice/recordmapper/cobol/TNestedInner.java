@@ -10,11 +10,11 @@ public class TNestedInner {
 	String inner1 = "inner1";
 
 	@CBLNested
-	TProperty p1 = new TProperty();
+	TPropertyBinaryLength p1 = new TPropertyBinaryLength();
 
 	@CBLString(10)
 	String inner2 = "inner2";
 
 	@CBLNested
-	TProperty p2 = new TProperty();
+	TPropertyBinaryLength p2 = new TPropertyBinaryLength();
 }

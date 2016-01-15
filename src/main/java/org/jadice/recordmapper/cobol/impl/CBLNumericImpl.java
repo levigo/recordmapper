@@ -2,8 +2,10 @@ package org.jadice.recordmapper.cobol.impl;
 
 import java.lang.annotation.Annotation;
 
+import org.jadice.recordmapper.Endian;
 import org.jadice.recordmapper.MappingException;
 import org.jadice.recordmapper.cobol.CBLNumeric;
+import org.jadice.recordmapper.cobol.CBLRecordAttributes;
 import org.jadice.recordmapper.impl.FieldMapping;
 import org.jadice.recordmapper.impl.MappingContext;
 import org.jadice.recordmapper.impl.MarshalContext;
@@ -20,33 +22,103 @@ public class CBLNumericImpl extends FieldMapping {
 		return spec.value();
 	}
 
-  public void marshal(MarshalContext ctx, Object value) throws MappingException {
-    ctx.put(adjustLength(null != value ? String.valueOf(value) : "0", ctx));
-  }
-
-  private String adjustLength(String value, MappingContext ctx) throws MappingException {
-    int expected = getSize(ctx);
-    int actual = value.length();
-
-    if (actual > expected) {
-          throw new MappingException("Length of value " + value + " for field " + field + " exceeds allowed length("
-              + expected + ")");
-    }
-
-    StringBuffer adjustedValue = new StringBuffer(value);
-    while (actual < expected) {
-      adjustedValue.insert(0, 0);
-      actual = adjustedValue.length();
-    }
-
-    return adjustedValue.toString();
-  }
-
-
-
-	public Object unmarshal(UnmarshalContext ctx) throws MappingException {
-	  return Long.valueOf(ctx.getString(getSize(ctx)));
+	public void marshal(MarshalContext ctx, Object value) throws MappingException {
+		marshal(ctx, //
+				((Number) value).longValue(), //
+				ctx.getRecordAttributes(CBLRecordAttributes.class).getEndian(), //
+				spec.signed());
 	}
 
+	protected void marshal(MarshalContext ctx, long v, Endian endian,
+			boolean isSigned) throws MappingException {
+		switch (getSize(ctx)){
+			case 1 :
+				if ((isSigned && (v > Byte.MAX_VALUE || v < Byte.MIN_VALUE))
+						|| (!isSigned && (v > 0xff || v < 0)))
+					throw new MappingException(
+							this, "Numerischer Wert für Feldlänge 1 außerhalb des zulässigen Bereiches");
+				ctx.put(isSigned ? (byte) v : (byte) (v & 0xff));
+				break;
+			case 2 :
+				if ((isSigned && (v > Short.MAX_VALUE || v < Short.MIN_VALUE))
+						|| (!isSigned && (v > 0xffff || v < 0)))
+					throw new MappingException(
+							this, "Numerischer Wert für Feldlänge 2 außerhalb des zulässigen Bereiches");
+				storeValue(ctx, endian, isSigned ? (short) v : (short) (v & 0xffff));
+				break;
+			case 4 :
+				if ((isSigned && (v > Integer.MAX_VALUE || v < Integer.MIN_VALUE))
+						|| (!isSigned && (v > 0xffffffffl || v < 0)))
+					throw new MappingException(
+							this, "Numerischer Wert für Feldlänge 4 außerhalb des zulässigen Bereiches");
+				storeValue(ctx, endian, isSigned ? (int) v : (int) (v & 0xffffffffl));
+				break;
+			case 8 :
+				if (!isSigned)
+					throw new MappingException(this, "Unsigned-Long-Werte nicht unterstützt");
+				storeValue(ctx, endian, v);
+				break;
+			default :
+				throw new MappingException(this, "Ungültige Länge für CBLNumeric");
+		}
+	}
 
+	private void storeValue(MarshalContext ctx, Endian endian,
+			long valueRespectingSign) throws MappingException {
+		int s = getSize(ctx);
+		byte buffer[] = new byte[s];
+
+		int shift = 0;
+		int offset = endian == Endian.BIG ? s : 0;
+		int fillOrder = endian == Endian.BIG ? -1 : 1;
+		for (int i = 0; i < s; i++) {
+			offset += fillOrder;
+			buffer[offset] = (byte) ((valueRespectingSign >> shift) & 0xff);
+			shift += 8;
+		}
+
+		ctx.put(buffer);
+	}
+
+	public Object unmarshal(UnmarshalContext ctx) throws MappingException {
+		return unmarshal(ctx,//
+				ctx.getBytes(getSize(ctx)), //
+				ctx.getRecordAttributes(CBLRecordAttributes.class).getEndian(), //
+				spec.signed());
+	}
+
+	protected Object unmarshal(UnmarshalContext ctx, final byte[] b,
+			Endian endian, boolean isSigned) throws MappingException {
+		switch (getSize(ctx)){
+			case 1 :
+				long value = b[0];
+				return isSigned ? value : value & 0xffl;
+			case 2 :
+				value = extractValue(b, endian, ctx);
+				return isSigned ? value : value & 0xffffl;
+			case 4 :
+				value = extractValue(b, endian, ctx);
+				return isSigned ? value : value & 0xffffffffl;
+			case 8 :
+				return extractValue(b, endian, ctx);
+			default :
+				throw new MappingException(this, "Ungültige Länge für CBLNumeric");
+		}
+	}
+
+	private long extractValue(final byte[] byteArray, Endian endian,
+			MappingContext ctx) {
+		long result = 0;
+		int shift = 0;
+		int s = getSize(ctx);
+		int offset = endian == Endian.BIG ? s : 0;
+		int fillOrder = endian == Endian.BIG ? -1 : 1;
+		for (int i = 0; i < s; i++) {
+			offset += fillOrder;
+			result |= (((long) byteArray[offset]) & 0xff) << shift;
+			shift += 8;
+		}
+
+		return result;
+	}
 }

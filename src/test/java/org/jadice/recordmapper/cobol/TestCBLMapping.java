@@ -24,13 +24,13 @@ import org.junit.Test;
 
 public class TestCBLMapping {
   @Test
-  public void testFlatRecord() throws Exception {
-    final MappingFactory mf = MappingFactory.create(TProperty.class);
+  public void testPropertyBinaryLength() throws Exception {
+    final MappingFactory mf = MappingFactory.create(TPropertyBinaryLength.class);
 
     for (int i = 0; i < 5; i++) {
       final String value = "Foo" + "ABCDEFGHI".substring(0, i);
 
-      TProperty p = new TProperty();
+      TPropertyBinaryLength p = new TPropertyBinaryLength();
       p.name = "Foo";
       p.value = value;
 
@@ -39,28 +39,51 @@ public class TestCBLMapping {
 
       final byte[] bytes = os.toByteArray();
 
-      p = mf.createUnmarshaller().unmarshal(TProperty.class, new ByteArrayInputStream(bytes));
+      p = mf.createUnmarshaller().unmarshal(TPropertyBinaryLength.class, new ByteArrayInputStream(bytes));
 
+      assertEquals("Foo", p.name);
+      assertEquals(value, p.value);
+    }
+  }
+  
+  @Test
+  public void testPropertyStringLength() throws Exception {
+    final MappingFactory mf = MappingFactory.create(TPropertyStringLength.class);
+    
+    for (int i = 0; i < 5; i++) {
+      final String value = "Foo" + "ABCDEFGHI".substring(0, i);
+      
+      TPropertyStringLength p = new TPropertyStringLength();
+      p.name = "Foo";
+      p.value = value;
+      
+      final ByteArrayOutputStream os = new ByteArrayOutputStream();
+      mf.createMarshaller().marshal(p, os);
+      
+      final byte[] bytes = os.toByteArray();
+      
+      p = mf.createUnmarshaller().unmarshal(TPropertyStringLength.class, new ByteArrayInputStream(bytes));
+      
       assertEquals("Foo", p.name);
       assertEquals(value, p.value);
     }
   }
 
   @Test
-  public void testCollectionOfRecordsByCount() throws Exception {
-    final MappingFactory mf = MappingFactory.create(TPropertyCollectionByCount.class);
+  public void testCollectionOfRecordsByBinaryCount() throws Exception {
+    final MappingFactory mf = MappingFactory.create(TPropertyCollectionByBinaryCount.class);
 
-    TPropertyCollectionByCount c = new TPropertyCollectionByCount();
-    c.properties = new ArrayList<TProperty>();
+    TPropertyCollectionByBinaryCount c = new TPropertyCollectionByBinaryCount();
+    c.properties = new ArrayList<TPropertyBinaryLength>();
 
-    fillProps(c.properties);
+    fillProps(c.properties, TPropertyBinaryLength.class);
 
     final ByteArrayOutputStream os = new ByteArrayOutputStream();
     mf.createMarshaller().marshal(c, os);
 
     final byte[] bytes = os.toByteArray();
 
-    c = mf.createUnmarshaller().unmarshal(TPropertyCollectionByCount.class, new ByteArrayInputStream(bytes));
+    c = mf.createUnmarshaller().unmarshal(TPropertyCollectionByBinaryCount.class, new ByteArrayInputStream(bytes));
 
     assertEquals(5, c.count);
 
@@ -68,20 +91,41 @@ public class TestCBLMapping {
   }
 
   @Test
-  public void testCollectionOfRecordsBySize() throws Exception {
-    final MappingFactory mf = MappingFactory.create(TPropertyCollectionBySize.class);
+  public void testCollectionOfRecordsByStringCount() throws Exception {
+    final MappingFactory mf = MappingFactory.create(TPropertyCollectionByStringCount.class);
 
-    TPropertyCollectionBySize c = new TPropertyCollectionBySize();
-    c.properties = new ArrayList<TProperty>();
+    TPropertyCollectionByStringCount c = new TPropertyCollectionByStringCount();
+    c.properties = new ArrayList<TPropertyStringLength>();
 
-    fillProps(c.properties);
+    fillProps(c.properties, TPropertyStringLength.class);
 
     final ByteArrayOutputStream os = new ByteArrayOutputStream();
     mf.createMarshaller().marshal(c, os);
 
     final byte[] bytes = os.toByteArray();
 
-    c = mf.createUnmarshaller().unmarshal(TPropertyCollectionBySize.class, new ByteArrayInputStream(bytes));
+    c = mf.createUnmarshaller().unmarshal(TPropertyCollectionByStringCount.class, new ByteArrayInputStream(bytes));
+
+    assertEquals(5, c.count);
+
+    verifyProps(c.properties);
+  }
+
+  @Test
+  public void testCollectionOfRecordsByBinarySize() throws Exception {
+    final MappingFactory mf = MappingFactory.create(TPropertyCollectionByBinarySize.class);
+
+    TPropertyCollectionByBinarySize c = new TPropertyCollectionByBinarySize();
+    c.properties = new ArrayList<TPropertyBinaryLength>();
+
+    fillProps(c.properties, TPropertyBinaryLength.class);
+
+    final ByteArrayOutputStream os = new ByteArrayOutputStream();
+    mf.createMarshaller().marshal(c, os);
+
+    final byte[] bytes = os.toByteArray();
+
+    c = mf.createUnmarshaller().unmarshal(TPropertyCollectionByBinarySize.class, new ByteArrayInputStream(bytes));
 
     assertEquals(245, c.size);
 
@@ -89,20 +133,41 @@ public class TestCBLMapping {
   }
 
   @Test
-  public void testArrayOfRecordsByCount() throws Exception {
-    final MappingFactory mf = MappingFactory.create(TPropertyArrayByCount.class);
+  public void testCollectionOfRecordsByStringSize() throws Exception {
+    final MappingFactory mf = MappingFactory.create(TPropertyCollectionByStringSize.class);
 
-    TPropertyArrayByCount c = new TPropertyArrayByCount();
-    final ArrayList<TProperty> list = new ArrayList<TProperty>();
-    fillProps(list);
-    c.properties = list.toArray(new TProperty[5]);
+    TPropertyCollectionByStringSize c = new TPropertyCollectionByStringSize();
+    c.properties = new ArrayList<TPropertyStringLength>();
+
+    fillProps(c.properties, TPropertyStringLength.class);
 
     final ByteArrayOutputStream os = new ByteArrayOutputStream();
     mf.createMarshaller().marshal(c, os);
 
     final byte[] bytes = os.toByteArray();
 
-    c = mf.createUnmarshaller().unmarshal(TPropertyArrayByCount.class, new ByteArrayInputStream(bytes));
+    c = mf.createUnmarshaller().unmarshal(TPropertyCollectionByStringSize.class, new ByteArrayInputStream(bytes));
+
+    assertEquals(245, c.size);
+
+    verifyProps(c.properties);
+  }
+
+  @Test
+  public void testArrayOfRecordsByBinaryCount() throws Exception {
+    final MappingFactory mf = MappingFactory.create(TPropertyArrayByBinaryCount.class);
+
+    TPropertyArrayByBinaryCount c = new TPropertyArrayByBinaryCount();
+    final ArrayList<TPropertyBinaryLength> list = new ArrayList<TPropertyBinaryLength>();
+    fillProps(list, TPropertyBinaryLength.class);
+    c.properties = list.toArray(new TPropertyBinaryLength[5]);
+
+    final ByteArrayOutputStream os = new ByteArrayOutputStream();
+    mf.createMarshaller().marshal(c, os);
+
+    final byte[] bytes = os.toByteArray();
+
+    c = mf.createUnmarshaller().unmarshal(TPropertyArrayByBinaryCount.class, new ByteArrayInputStream(bytes));
 
     assertEquals(5, c.count);
 
@@ -110,20 +175,62 @@ public class TestCBLMapping {
   }
 
   @Test
-  public void testArrayOfRecordsBySize() throws Exception {
-    final MappingFactory mf = MappingFactory.create(TPropertyArrayBySize.class);
+  public void testArrayOfRecordsByStringCount() throws Exception {
+    final MappingFactory mf = MappingFactory.create(TPropertyArrayByStringCount.class);
 
-    TPropertyArrayBySize c = new TPropertyArrayBySize();
-    final ArrayList<TProperty> list = new ArrayList<TProperty>();
-    fillProps(list);
-    c.properties = list.toArray(new TProperty[5]);
+    TPropertyArrayByStringCount c = new TPropertyArrayByStringCount();
+    final ArrayList<TPropertyStringLength> list = new ArrayList<TPropertyStringLength>();
+    fillProps(list, TPropertyStringLength.class);
+    c.properties = list.toArray(new TPropertyStringLength[5]);
 
     final ByteArrayOutputStream os = new ByteArrayOutputStream();
     mf.createMarshaller().marshal(c, os);
 
     final byte[] bytes = os.toByteArray();
 
-    c = mf.createUnmarshaller().unmarshal(TPropertyArrayBySize.class, new ByteArrayInputStream(bytes));
+    c = mf.createUnmarshaller().unmarshal(TPropertyArrayByStringCount.class, new ByteArrayInputStream(bytes));
+
+    assertEquals(5, c.count);
+
+    verifyProps(Arrays.asList(c.properties));
+  }
+
+  @Test
+  public void testArrayOfRecordsByBinarySize() throws Exception {
+    final MappingFactory mf = MappingFactory.create(TPropertyArrayByBinarySize.class);
+
+    TPropertyArrayByBinarySize c = new TPropertyArrayByBinarySize();
+    final ArrayList<TPropertyBinaryLength> list = new ArrayList<TPropertyBinaryLength>();
+    fillProps(list, TPropertyBinaryLength.class);
+    c.properties = list.toArray(new TPropertyBinaryLength[5]);
+
+    final ByteArrayOutputStream os = new ByteArrayOutputStream();
+    mf.createMarshaller().marshal(c, os);
+
+    final byte[] bytes = os.toByteArray();
+
+    c = mf.createUnmarshaller().unmarshal(TPropertyArrayByBinarySize.class, new ByteArrayInputStream(bytes));
+
+    assertEquals(245, c.size);
+
+    verifyProps(Arrays.asList(c.properties));
+  }
+
+  @Test
+  public void testArrayOfRecordsByStringSize() throws Exception {
+    final MappingFactory mf = MappingFactory.create(TPropertyArrayByStringSize.class);
+
+    TPropertyArrayByStringSize c = new TPropertyArrayByStringSize();
+    final ArrayList<TPropertyStringLength> list = new ArrayList<TPropertyStringLength>();
+    fillProps(list, TPropertyStringLength.class);
+    c.properties = list.toArray(new TPropertyStringLength[5]);
+
+    final ByteArrayOutputStream os = new ByteArrayOutputStream();
+    mf.createMarshaller().marshal(c, os);
+
+    final byte[] bytes = os.toByteArray();
+
+    c = mf.createUnmarshaller().unmarshal(TPropertyArrayByStringSize.class, new ByteArrayInputStream(bytes));
 
     assertEquals(245, c.size);
 
@@ -135,10 +242,10 @@ public class TestCBLMapping {
     final MappingFactory mf = MappingFactory.create(TPropertyFixedLengthCollection.class);
 
     TPropertyFixedLengthCollection c = new TPropertyFixedLengthCollection();
-    c.properties = new ArrayList<TProperty>();
+    c.properties = new ArrayList<TPropertyBinaryLength>();
 
-    fillProps(c.properties);
-    fillProps(c.properties);
+    fillProps(c.properties, TPropertyBinaryLength.class);
+    fillProps(c.properties, TPropertyBinaryLength.class);
 
     try {
       mf.createMarshaller().marshal(c, new ByteArrayOutputStream());
@@ -147,8 +254,8 @@ public class TestCBLMapping {
       // expected
     }
 
-    c.properties = new ArrayList<TProperty>();
-    fillProps(c.properties);
+    c.properties = new ArrayList<TPropertyBinaryLength>();
+    fillProps(c.properties, TPropertyBinaryLength.class);
 
     final ByteArrayOutputStream os = new ByteArrayOutputStream();
     mf.createMarshaller().marshal(c, os);
@@ -160,21 +267,21 @@ public class TestCBLMapping {
     verifyProps(c.properties);
   }
 
-  private void verifyProps(List<TProperty> l) {
+  private void verifyProps(List<? extends TProperty> l) {
     for (int i = 0; i < 5; i++) {
       final String value = "Foo" + "ABCDEFGHI".substring(0, i);
-      assertEquals("Foo" + i, l.get(i).name);
-      assertEquals(value, l.get(i).value);
+      assertEquals("Foo" + i, l.get(i).getName());
+      assertEquals(value, l.get(i).getValue());
     }
   }
 
-  private void fillProps(List<TProperty> l) {
+  private <T extends TProperty> void fillProps(List<T> l, Class<T> c) throws Exception {
     for (int i = 0; i < 5; i++) {
       final String value = "Foo" + "ABCDEFGHI".substring(0, i);
 
-      final TProperty p = new TProperty();
-      p.name = "Foo" + i;
-      p.value = value;
+      final T p = c.newInstance();
+      p.setName("Foo" + i);
+      p.setValue(value);
 
       l.add(p);
     }
@@ -537,7 +644,7 @@ public class TestCBLMapping {
   }
 
   @Test
-  public void testNumbericStrings() throws Exception {
+  public void testNumericStrings() throws Exception {
     final MappingFactory f = MappingFactory.create(MyTestClass2.class);
     final Marshaller m = f.createMarshaller();
     final Unmarshaller u = f.createUnmarshaller();
@@ -637,6 +744,95 @@ public class TestCBLMapping {
 
     Assert.assertEquals(expected, encoded);
     return baos;
+  }
+
+  // *****************************************
+  @CBLRecord
+  public static class MyTestClass4 {
+    @CBLNumeric(1)
+    Byte myByte;
+
+    @CBLNumeric(2)
+    Short myShort;
+
+    @CBLNumeric(4)
+    Integer myInteger;
+
+    @CBLNumeric(value=8, signed=true)
+    Long myLong;
+
+    @CBLNumeric(1)
+    byte dummy;
+    
+    @CBLNumeric(1)
+    byte mybyte;
+
+    @CBLNumeric(2)
+    short myshort;
+
+    @CBLNumeric(4)
+    int myint;
+
+    @CBLNumeric(value=8, signed=true)
+    long mylong;
+  }
+
+  @Test
+  public void testBinaryNumeric() throws Exception {
+    final MappingFactory f = MappingFactory.create(MyTestClass4.class);
+    final Marshaller m = f.createMarshaller();
+    final Unmarshaller u = f.createUnmarshaller();
+    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+
+    final MyTestClass4 tc = new MyTestClass4();
+    tc.mybyte = Byte.MAX_VALUE - 1;
+    tc.myByte = Byte.MAX_VALUE - 1;
+
+    tc.myshort = Short.MAX_VALUE - 1;
+    tc.myShort = Short.MAX_VALUE - 1;
+
+    tc.myint = Integer.MAX_VALUE - 1;
+    tc.myInteger = Integer.MAX_VALUE - 1;
+
+    tc.mylong = Long.MAX_VALUE - 1;
+    tc.myLong = Long.MAX_VALUE - 1;
+
+    tc.mylong = Long.MAX_VALUE - 1;
+    tc.myLong = Long.MAX_VALUE - 1;
+
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    m.marshal(tc, baos);
+
+
+    Assert.assertEquals(
+        "7E7FFE7FFFFFFE7FFFFFFFFFFFFFFE007E7FFE7FFFFFFE7FFFFFFFFFFFFFFE",
+        toHexString(baos.toByteArray()));
+
+    final MyTestClass4 tcu = u.unmarshal(MyTestClass4.class, new ByteArrayInputStream(baos.toByteArray()));
+
+    Assert.assertEquals(tcu.mybyte, Byte.MAX_VALUE - 1);
+    Assert.assertEquals(tcu.myByte, new Byte((byte) (Byte.MAX_VALUE - 1)));
+
+    Assert.assertEquals(tcu.myshort, Short.MAX_VALUE - 1);
+    Assert.assertEquals(tcu.myShort, new Short((short) (Short.MAX_VALUE - 1)));
+
+    Assert.assertEquals(tcu.myint, Integer.MAX_VALUE - 1);
+    Assert.assertEquals(tcu.myInteger, new Integer(Integer.MAX_VALUE - 1));
+
+    Assert.assertEquals(tcu.mylong, Long.MAX_VALUE - 1);
+    Assert.assertEquals(tcu.myLong, new Long(Long.MAX_VALUE - 1));
+  }
+
+  private static String toHexString(byte[] b) {
+    StringBuilder buf = new StringBuilder();
+    for (int i = 0; i < b.length; i++) {
+      String s = Integer.toHexString(b[i] & 0xff).toUpperCase();
+      if (s.length() == 1) {
+        buf.append('0');
+      }
+      buf.append(s);
+    }
+    return buf.toString();
   }
 
   // *****************************************

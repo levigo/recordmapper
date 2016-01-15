@@ -27,213 +27,195 @@ import org.jadice.recordmapper.impl.UnmarshalContext;
 
 public class CBLTableImpl extends FieldMapping {
 
-	private CBLTable spec;
+  private CBLTable spec;
 
-	private Class<?> collectionType;
-	private Class<?> memberType;
+  private Class<?> collectionType;
+  private Class<?> memberType;
 
-	private RecordMapping memberMapping;
+  private RecordMapping memberMapping;
 
-	private FieldMapping sizeOrCountField;
+  private FieldMapping sizeOrCountField;
 
-	private int fixedLength = -1;
+  private int fixedLength = -1;
 
   private boolean isSizeRef;
 
-	@Override
+  @Override
   protected void init(Annotation a) throws MappingException {
-		this.spec = (CBLTable) a;
+    this.spec = (CBLTable) a;
 
-		// determine member type
-		collectionType = field.getType();
-		if (Collection.class.isAssignableFrom(collectionType)) {
-			if (Map.class.isAssignableFrom(collectionType)) {
-				throw new MappingException(this, a + " with maps is not yet supported");
-			} else {
-				final Type t = field.getGenericType();
-				if (!(t instanceof ParameterizedType))
-					throw new MappingException(this, a
-							+ " with collections require a generic type parameter");
+    // determine member type
+    collectionType = field.getType();
+    if (Collection.class.isAssignableFrom(collectionType)) {
+      if (Map.class.isAssignableFrom(collectionType)) {
+        throw new MappingException(this, a + " with maps is not yet supported");
+      } else {
+        final Type t = field.getGenericType();
+        if (!(t instanceof ParameterizedType))
+          throw new MappingException(this, a + " with collections require a generic type parameter");
 
-				final ParameterizedType pt = (ParameterizedType) t;
+        final ParameterizedType pt = (ParameterizedType) t;
 
         memberType = (Class<?>) pt.getActualTypeArguments()[0];
-			}
+      }
 
-		} else if (collectionType.isArray()) {
-			memberType = field.getType().getComponentType();
-		} else
-			throw new MappingException(this, a
-					+ " is only allowed in conjunction with Collection or array types.");
+    } else if (collectionType.isArray()) {
+      memberType = field.getType().getComponentType();
+    } else
+      throw new MappingException(this, a + " is only allowed in conjunction with Collection or array types.");
 
-		if (memberType.getAnnotation(CBLRecord.class) == null)
-			throw new MappingException(this, "Member type " + memberType + " for a " + a
-					+ " is not annotated with @CBLRecord.");
+    if (memberType.getAnnotation(CBLRecord.class) == null)
+      throw new MappingException(this,
+          "Member type " + memberType + " for a " + a + " is not annotated with @CBLRecord.");
 
-		// do I have a fixed length?
-		final CBLFixedLength fs = field.getAnnotation(CBLFixedLength.class);
-		if (fs != null)
-			fixedLength = fs.value();
-	}
+    // do I have a fixed length?
+    final CBLFixedLength fs = field.getAnnotation(CBLFixedLength.class);
+    if (fs != null)
+      fixedLength = fs.value();
+  }
 
-	@Override
+  @Override
   public Collection<? extends Class<?>> getReferencedClasses() {
-		return Collections.singleton(memberType);
-	}
+    return Collections.singleton(memberType);
+  }
 
-	@Override
-	protected void postInit() throws MappingException {
-		super.postInit();
+  @Override
+  protected void postInit() throws MappingException {
+    super.postInit();
 
-		memberMapping = recordMapping.getRecordMapping(memberType);
-		if (null == memberMapping)
-			throw new MappingException(this, "COBOL-mapping for " + memberType
-					+ " could not be found");
-		
-    if(spec.sizeRef().length() > 0 && spec.countRef().length() > 0) 
+    memberMapping = recordMapping.getRecordMapping(memberType);
+    if (null == memberMapping)
+      throw new MappingException(this, "COBOL-mapping for " + memberType + " could not be found");
+
+    if (spec.sizeRef().length() > 0 && spec.countRef().length() > 0)
       throw new MappingException(this, "Can have either sizeRef or countRef, but not both");
 
-    if(spec.sizeRef().length() > 0) {
-		  sizeOrCountField = recordMapping.getFieldMapping(spec.sizeRef());
-		  isSizeRef = true;
-		}
-    if(spec.countRef().length() > 0) {
+    if (spec.sizeRef().length() > 0) {
+      sizeOrCountField = recordMapping.getFieldMapping(spec.sizeRef());
+      isSizeRef = true;
+    }
+    if (spec.countRef().length() > 0) {
       sizeOrCountField = recordMapping.getFieldMapping(spec.countRef());
     }
-	}
+    
+    if(null == sizeOrCountField && fixedLength < 0)
+      throw new MappingException(this, "Must have either 'sizeRef', 'countRef' or a fixed length");
+  }
 
-	@Override
+  @Override
   public int getSize(MappingContext ctx) throws MappingException {
-		if (!(ctx instanceof MarshalContext)) {
-			if (null != sizeOrCountField && sizeOrCountField instanceof CBLSizeImpl)
-				return ((Number) ctx.getValue(sizeOrCountField.getField())).intValue();
+    if (!(ctx instanceof MarshalContext)) {
+      if (null != sizeOrCountField)
+        return ((Number) ctx.getValue(sizeOrCountField.getField())).intValue();
 
-			throw new MappingException(
-					this, "I am not supposed to know my size at this point");
-		}
+      throw new MappingException(this, "I am not supposed to know my size at this point");
+    }
 
-		int size = 0;
+    int size = 0;
 
-		for (final Object member : getMembers(ctx))
-			size += memberMapping.getSize(((MarshalContext) ctx)
-					.getMemberContext(member));
+    for (final Object member : getMembers(ctx))
+      size += memberMapping.getSize(((MarshalContext) ctx).getMemberContext(member));
 
-		return size;
-	}
+    return size;
+  }
 
-	@SuppressWarnings("unchecked")
-	private Collection<Object> getMembers(MappingContext ctx)
-			throws MappingException {
-		final Object v = ctx.getValue(field);
+  @SuppressWarnings("unchecked")
+  private Collection<Object> getMembers(MappingContext ctx) throws MappingException {
+    final Object v = ctx.getValue(field);
 
-		if (null == v)
-			return Collections.EMPTY_LIST;
+    if (null == v)
+      return Collections.EMPTY_LIST;
 
-		if (!collectionType.isArray())
-			return (Collection<Object>) v;
+    if (!collectionType.isArray())
+      return (Collection<Object>) v;
 
-		return Arrays.asList((Object[]) v);
-	}
+    return Arrays.asList((Object[]) v);
+  }
 
-	@Override
+  @Override
   public void marshal(MarshalContext ctx, Object value) throws MappingException {
-		final Collection<Object> members = getMembers(ctx);
+    final Collection<Object> members = getMembers(ctx);
 
-		if (fixedLength >= 0 && members.size() != fixedLength)
-			throw new MappingException(
-					this, "Collection or array size does not match fixed size: expected "
-							+ fixedLength + "is " + members.size());
+    if (fixedLength >= 0 && members.size() != fixedLength)
+      throw new MappingException(this,
+          "Collection or array size does not match fixed size: expected " + fixedLength + "is " + members.size());
 
-		for (final Object member : members)
-			memberMapping.marshal(member, ctx.getMemberContext(member));
-	}
+    for (final Object member : members)
+      memberMapping.marshal(member, ctx.getMemberContext(member));
+  }
 
-	@Override
-	public void beforeMarshal(MarshalContext mc) throws MappingException {
-	  super.beforeMarshal(mc);
-	  
-	  if (sizeOrCountField != null && (sizeOrCountField instanceof CBLNumericImpl || sizeOrCountField instanceof CBLNumericStringImpl)) {
-      final long sc = isSizeRef ? getSize(mc) : getCount(mc);
-      try {
-        sizeOrCountField.getField().setLong(mc.getRecord(), sc);
-      } catch (Exception e) {
-        throw new MappingException(sizeOrCountField, "Can't set size/count", e);
+  @Override
+  public void beforeMarshal(MarshalContext mc) throws MappingException {
+    super.beforeMarshal(mc);
+
+    if (sizeOrCountField != null
+        && (sizeOrCountField instanceof CBLNumericImpl || sizeOrCountField instanceof CBLNumericStringImpl)) {
+      setIntegerFieldValue(mc, sizeOrCountField, isSizeRef ? getSize(mc) : getCount(mc));
+    }
+  }
+
+  @Override
+  public Object unmarshal(UnmarshalContext ctx) throws MappingException {
+    int expectedSize = -1;
+    int expectedCount = fixedLength;
+
+    if (sizeOrCountField != null) {
+      final int sc = ((Number) ctx.getValue(sizeOrCountField.getField())).intValue();
+
+      if (sizeOrCountField instanceof CBLNumericImpl || sizeOrCountField instanceof CBLNumericStringImpl) {
+        if (isSizeRef)
+          expectedSize = sc;
+        else
+          expectedCount = sc;
       }
     }
-	}
-	
-	@Override
-  public Object unmarshal(UnmarshalContext ctx) throws MappingException {
-		int expectedSize = -1;
-		int expectedCount = fixedLength;
 
-		if (sizeOrCountField != null) {
-			final int sc = ((Number) ctx.getValue(sizeOrCountField.getField())).intValue();
-			if (sizeOrCountField instanceof CBLSizeImpl)
-				expectedSize = sc;
-			else if (sizeOrCountField instanceof CBLCountImpl)
-				expectedCount = sc;
-			else if(sizeOrCountField instanceof CBLNumericImpl || sizeOrCountField instanceof CBLNumericStringImpl) {
-			  if(isSizeRef)
-			    expectedSize = sc;
-			  else
-			    expectedCount = sc;
-			}
-		}
+    if (expectedSize < 0 && expectedCount < 0)
+      throw new MappingException(this, "Can't unmarshal table: neither have size nor count");
 
-		if (expectedSize < 0 && expectedCount < 0)
-			throw new MappingException(
-					this, "Can't unmarshal table: neither have size nor count");
+    final int startPos = ctx.getPosition();
+    final List<Object> members = new ArrayList<Object>(expectedSize > 0 ? expectedSize : 0);
+    while ((expectedCount < 0 || members.size() < expectedCount)
+        && (expectedSize < 0 || ctx.getPosition() - startPos < expectedSize)) {
+      try {
+        final Object member = memberType.newInstance();
+        final UnmarshalContext mc = ctx.createMemberContext(member, memberMapping);
+        memberMapping.unmarshal(member, mc);
 
-		final int startPos = ctx.getPosition();
-		final List<Object> members = new ArrayList<Object>(expectedSize > 0
-				? expectedSize
-				: 0);
-		while ((expectedCount < 0 || members.size() < expectedCount)
-				&& (expectedSize < 0 || ctx.getPosition() - startPos < expectedSize)) {
-			try {
-				final Object member = memberType.newInstance();
-				final UnmarshalContext mc = ctx.createMemberContext(member, memberMapping);
-				memberMapping.unmarshal(member, mc);
+        members.add(member);
+      } catch (final Exception e) {
+        throw new MappingException(this, "Can't create member instance for " + memberType, e);
+      }
+    }
 
-				members.add(member);
-			} catch (final Exception e) {
-				throw new MappingException(this, "Can't create member instance for "
-						+ memberType, e);
-			}
-		}
+    // cast collection to proper type
+    if (collectionType.isArray())
+      return members.toArray((Object[]) Array.newInstance(memberType, members.size()));
 
-		// cast collection to proper type
-		if (collectionType.isArray())
-			return members.toArray((Object[]) Array.newInstance(memberType, members
-					.size()));
+    if (Set.class.isAssignableFrom(collectionType))
+      return new HashSet<Object>(members);
 
-		if (Set.class.isAssignableFrom(collectionType))
-			return new HashSet<Object>(members);
+    if (Vector.class.isAssignableFrom(collectionType))
+      return new Vector<Object>(members);
 
-		if (Vector.class.isAssignableFrom(collectionType))
-			return new Vector<Object>(members);
+    if (Stack.class.isAssignableFrom(collectionType)) {
+      final Stack<Object> s = new Stack<Object>();
+      s.addAll(members);
+      return s;
+    }
 
-		if (Stack.class.isAssignableFrom(collectionType)) {
-			final Stack<Object> s = new Stack<Object>();
-			s.addAll(members);
-			return s;
-		}
+    return members;
+  }
 
-		return members;
-	}
+  public long getCount(MarshalContext ctx) throws MappingException {
+    return getMembers(ctx).size();
+  }
 
-	public long getCount(MarshalContext ctx) throws MappingException {
-		return getMembers(ctx).size();
-	}
+  @Override
+  public void registerParameterField(FieldMapping param) throws MappingException {
+    if (fixedLength >= 0)
+      throw new MappingException(this, "Size or count not expected: table already has a fixed length");
 
-	@Override
-	public void registerParameterField(FieldMapping param)
-			throws MappingException {
-		if (fixedLength >= 0)
-			throw new MappingException(
-					this, "Size or count not expected: table already has a fixed length");
-
-		sizeOrCountField = param;
-	}
+    sizeOrCountField = param;
+  }
 }

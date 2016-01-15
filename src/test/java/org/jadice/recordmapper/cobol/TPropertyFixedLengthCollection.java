@@ -10,5 +10,5 @@ import org.jadice.recordmapper.cobol.CBLTable;
 public class TPropertyFixedLengthCollection {
 	@CBLTable
 	@CBLFixedLength(5)
-	public List<TProperty> properties;
+	public List<TPropertyBinaryLength> properties;
 }
