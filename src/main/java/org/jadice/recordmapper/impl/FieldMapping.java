@@ -61,7 +61,7 @@ public abstract class FieldMapping extends Mapping {
 	
 	@Override
 	public String toString() {
-	  return "Field: " + field.getName();
+	  return recordMapping.recordClass.getSimpleName() + "." + field.getName();
 	}
 
   protected void setIntegerFieldValue(MarshalContext mc, FieldMapping field, final long value) throws MappingException {
