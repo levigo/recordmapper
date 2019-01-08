@@ -7,9 +7,11 @@
 
 	<name>levigo record mapper</name>
 	<inceptionYear>2015</inceptionYear>
+	
 	<organization>
 		<name>levigo solutions GmbH</name>
 	</organization>
+	
 	<contributors>
 		<contributor>
 			<organization>levigo solutions GmbH</organization>
@@ -17,13 +19,27 @@
 		</contributor>
 	</contributors>
 
-	<licenses>
-		<license>
-			<name>Three-clause BSD-style license</name>
-			<url>LICENSE.md</url>
-		</license>
-	</licenses>
+  <scm>
+    <connection>scm:git:https://github.com/levigo/recordmapper.git</connection>
+    <url>https://github.com/levigo/recordmapper</url>
+  </scm>
+  
+  <licenses>
+    <license>
+      <name>BSD 3-Clause License</name>
+      <url>http://opensource.org/licenses/BSD-3-Clause</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
+  <developers>
+    <developer>
+      <name>Jörg Henne</name>
+      <email>hennejg@gmail.com</email>
+      <organizationUrl>http://levigo.de</organizationUrl>
+    </developer>
+  </developers>
+  
 	<build>
 		<plugins>
 			<plugin>
@@ -46,4 +62,79 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	
+	
+  <profiles>
+    <!-- Activate using the release property: mvn clean install -Prelease -->
+    <profile>
+      <id>release</id>
+      <activation>
+        <property>
+          <name>release</name>
+        </property>
+      </activation>
+
+      <build>
+        <plugins>
+          <!-- To release to Maven central -->
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.8</version>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            </configuration>
+          </plugin>
+
+          <!-- To generate javadoc -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.0.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.10.4</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!-- To sign the artifacts -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
