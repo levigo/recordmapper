@@ -10,8 +10,8 @@ is COBOL copybook style records.
 __Maven dependency__
 
     <dependency>
-        <groupId>org.jadice.gwt.spring</groupId>
-        <artifactId>gwt-spring-boot-starter</artifactId>
+        <groupId>org.jadice.recordmapper</groupId>
+        <artifactId>recordmapper</artifactId>
         <version>1.1.4</version>
     </dependency>
 
