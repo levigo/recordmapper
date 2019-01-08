@@ -1,29 +1,30 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.jadice.recordmapper</groupId>
-	<artifactId>recordmapper</artifactId>
-	<version>1.1-SNAPSHOT</version>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jadice.recordmapper</groupId>
+  <artifactId>recordmapper</artifactId>
+  <version>1.1-SNAPSHOT</version>
 
-	<name>levigo record mapper</name>
-	<inceptionYear>2015</inceptionYear>
-	
-	<organization>
-		<name>levigo solutions GmbH</name>
-	</organization>
-	
-	<contributors>
-		<contributor>
-			<organization>levigo solutions GmbH</organization>
-			<email>solutions@levigo.de</email>
-		</contributor>
-	</contributors>
+  <name>levigo record mapper</name>
+  <inceptionYear>2015</inceptionYear>
+
+  <organization>
+    <name>levigo solutions GmbH</name>
+  </organization>
+
+  <contributors>
+    <contributor>
+      <organization>levigo solutions GmbH</organization>
+      <email>solutions@levigo.de</email>
+    </contributor>
+  </contributors>
 
   <scm>
     <connection>scm:git:https://github.com/levigo/recordmapper.git</connection>
     <url>https://github.com/levigo/recordmapper</url>
   </scm>
-  
+
   <licenses>
     <license>
       <name>BSD 3-Clause License</name>
@@ -39,31 +40,45 @@
       <organizationUrl>http://levigo.de</organizationUrl>
     </developer>
   </developers>
-  
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
-	
-	
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.17</version>
+        <configuration>
+          <!-- see: https://stackoverflow.com/questions/53010200/maven-surefire-could-not-find-forkedbooter-class -->
+          <argLine>-Xmx1024m -Xms1024m -XX:MaxPermSize=512m
+            -Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+
   <profiles>
     <!-- Activate using the release property: mvn clean install -Prelease -->
     <profile>
