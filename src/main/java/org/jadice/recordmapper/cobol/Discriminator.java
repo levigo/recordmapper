@@ -12,7 +12,7 @@ public interface Discriminator {
 
   Class<?> getComponentType(MappingContext ctx) throws MappingException;
 
-	void beforeMarshal(MarshalContext ctx) throws MappingException;
+  void beforeMarshal(MarshalContext ctx) throws MappingException;
 
-	void afterUnmarshal(UnmarshalContext ctx) throws MappingException;
+  void afterUnmarshal(UnmarshalContext ctx) throws MappingException;
 }

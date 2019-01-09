@@ -5,10 +5,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ ElementType.FIELD })
+@Target({
+    ElementType.FIELD
+})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CBLDate {
-	public String value();
+  public String value();
 
-	public String nullDate() default "";
+  public String nullDate() default "";
 }

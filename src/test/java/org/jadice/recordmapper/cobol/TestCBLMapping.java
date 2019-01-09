@@ -45,25 +45,25 @@ public class TestCBLMapping {
       assertEquals(value, p.value);
     }
   }
-  
+
   @Test
   public void testPropertyStringLength() throws Exception {
     final MappingFactory mf = MappingFactory.create(TPropertyStringLength.class);
-    
+
     for (int i = 0; i < 5; i++) {
       final String value = "Foo" + "ABCDEFGHI".substring(0, i);
-      
+
       TPropertyStringLength p = new TPropertyStringLength();
       p.name = "Foo";
       p.value = value;
-      
+
       final ByteArrayOutputStream os = new ByteArrayOutputStream();
       mf.createMarshaller().marshal(p, os);
-      
+
       final byte[] bytes = os.toByteArray();
-      
+
       p = mf.createUnmarshaller().unmarshal(TPropertyStringLength.class, new ByteArrayInputStream(bytes));
-      
+
       assertEquals("Foo", p.name);
       assertEquals(value, p.value);
     }
@@ -431,11 +431,12 @@ public class TestCBLMapping {
 
   // ******************************************************
   public enum MyEnumWithCBLValues {
-    @CBLEnumValue("v_foo") FOO,
-    @CBLEnumValue("v_bar") BAR,
-    @CBLEnumValue("v_baz") BAZ,
-    @CBLEnumValue("v_a") A,
-    @CBLEnumValue("v_bb") BB;
+    @CBLEnumValue("v_foo")
+    FOO, @CBLEnumValue("v_bar")
+    BAR, @CBLEnumValue("v_baz")
+    BAZ, @CBLEnumValue("v_a")
+    A, @CBLEnumValue("v_bb")
+    BB;
   }
 
   @CBLRecord
@@ -758,12 +759,12 @@ public class TestCBLMapping {
     @CBLNumeric(4)
     Integer myInteger;
 
-    @CBLNumeric(value=8, signed=true)
+    @CBLNumeric(value = 8, signed = true)
     Long myLong;
 
     @CBLNumeric(1)
     byte dummy;
-    
+
     @CBLNumeric(1)
     byte mybyte;
 
@@ -773,7 +774,7 @@ public class TestCBLMapping {
     @CBLNumeric(4)
     int myint;
 
-    @CBLNumeric(value=8, signed=true)
+    @CBLNumeric(value = 8, signed = true)
     long mylong;
   }
 
@@ -804,8 +805,7 @@ public class TestCBLMapping {
     m.marshal(tc, baos);
 
 
-    Assert.assertEquals(
-        "7E7FFE7FFFFFFE7FFFFFFFFFFFFFFE007E7FFE7FFFFFFE7FFFFFFFFFFFFFFE",
+    Assert.assertEquals("7E7FFE7FFFFFFE7FFFFFFFFFFFFFFE007E7FFE7FFFFFFE7FFFFFFFFFFFFFFE",
         toHexString(baos.toByteArray()));
 
     final MyTestClass4 tcu = u.unmarshal(MyTestClass4.class, new ByteArrayInputStream(baos.toByteArray()));

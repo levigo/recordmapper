@@ -14,71 +14,66 @@ import org.jadice.recordmapper.impl.UnmarshalContext;
 
 public class CBLNestedImpl extends FieldMapping {
 
-	// private CBLNested spec;
+  // private CBLNested spec;
 
-	private Class<?> componentType;
-	private RecordMapping componentMapping;
+  private Class<?> componentType;
+  private RecordMapping componentMapping;
 
-	@Override
+  @Override
   protected void init(Annotation a) throws MappingException {
-		// this.spec = (CBLNested) a;
+    // this.spec = (CBLNested) a;
 
-		// determine member type
-		componentType = field.getType();
+    // determine member type
+    componentType = field.getType();
 
-		if (componentType.getAnnotation(CBLRecord.class) == null)
-			throw new MappingException(this, "Component type " + componentType + " for a "
-					+ a + " is not annotated with @CBLRecord.");
-	}
+    if (componentType.getAnnotation(CBLRecord.class) == null)
+      throw new MappingException(this,
+          "Component type " + componentType + " for a " + a + " is not annotated with @CBLRecord.");
+  }
 
-	@Override
+  @Override
   public Collection<? extends Class<?>> getReferencedClasses() {
-		return Collections.singleton(componentType);
-	}
+    return Collections.singleton(componentType);
+  }
 
-	@Override
-	protected void postInit() throws MappingException {
-		super.postInit();
+  @Override
+  protected void postInit() throws MappingException {
+    super.postInit();
 
-		componentMapping = recordMapping.getRecordMapping(componentType);
-		if (null == componentMapping)
-			throw new MappingException(this, "XMLMapping for " + componentType
-					+ " could not be found");
-	}
+    componentMapping = recordMapping.getRecordMapping(componentType);
+    if (null == componentMapping)
+      throw new MappingException(this, "XMLMapping for " + componentType + " could not be found");
+  }
 
-	@Override
+  @Override
   public int getSize(MappingContext ctx) throws MappingException {
-		if (!(ctx instanceof MarshalContext))
-			throw new MappingException(
-					this, "I am not supposed to know my size at this point");
+    if (!(ctx instanceof MarshalContext))
+      throw new MappingException(this, "I am not supposed to know my size at this point");
 
-		return componentMapping.getSize(((MarshalContext) ctx).getMemberContext(ctx
-				.getValue(field)));
-	}
+    return componentMapping.getSize(((MarshalContext) ctx).getMemberContext(ctx.getValue(field)));
+  }
 
-	@Override
+  @Override
   public void marshal(MarshalContext ctx, Object value) throws MappingException {
-		componentMapping.marshal(value, ctx.getMemberContext(value));
-	}
+    componentMapping.marshal(value, ctx.getMemberContext(value));
+  }
 
-	@Override
+  @Override
   public Object unmarshal(UnmarshalContext ctx) throws MappingException {
-		Object component;
-		try {
-			component = componentType.newInstance();
-			final UnmarshalContext mc = ctx
-					.createMemberContext(component, componentMapping);
-			componentMapping.unmarshal(component, mc);
+    Object component;
+    try {
+      component = componentType.newInstance();
+      final UnmarshalContext mc = ctx.createMemberContext(component, componentMapping);
+      componentMapping.unmarshal(component, mc);
 
-			return component;
-		} catch (final Exception e) {
-			throw new MappingException(this, e);
-		}
-	}
+      return component;
+    } catch (final Exception e) {
+      throw new MappingException(this, e);
+    }
+  }
 
-	@Override
-	public void registerParameterField(FieldMapping param)
-			throws MappingException {
-		// we don't care, but let a size field have its way anyway.
-	}
+  @Override
+  public void registerParameterField(FieldMapping param) throws MappingException {
+    // we don't care, but let a size field have its way anyway.
+  }
 }

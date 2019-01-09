@@ -5,9 +5,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.FIELD})
+@Target({
+    ElementType.FIELD
+})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CBLTable {
-  String sizeRef() default ""; 
-  String countRef() default ""; 
+  String sizeRef() default "";
+
+  String countRef() default "";
 }

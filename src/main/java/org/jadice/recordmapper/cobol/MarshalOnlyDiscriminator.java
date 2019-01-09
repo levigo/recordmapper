@@ -17,8 +17,7 @@ public class MarshalOnlyDiscriminator implements Discriminator {
 
   @Override
   public Class<?> getComponentType(MappingContext ctx) throws MappingException {
-    throw new UnsupportedOperationException(
-        "This discriminator can't be used for unmarshalling");
+    throw new UnsupportedOperationException("This discriminator can't be used for unmarshalling");
   }
 
   @Override

@@ -4,9 +4,9 @@ import java.util.List;
 
 @CBLRecord
 public class TPropertyCollectionByStringCount {
-	@CBLNumericString(4)
-	public int count;
+  @CBLNumericString(4)
+  public int count;
 
-	@CBLTable(countRef="count")
-	public List<TPropertyStringLength> properties;
+  @CBLTable(countRef = "count")
+  public List<TPropertyStringLength> properties;
 }

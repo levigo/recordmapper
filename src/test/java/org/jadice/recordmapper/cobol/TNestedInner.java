@@ -6,15 +6,15 @@ import org.jadice.recordmapper.cobol.CBLString;
 
 @CBLRecord
 public class TNestedInner {
-	@CBLString(10)
-	String inner1 = "inner1";
+  @CBLString(10)
+  String inner1 = "inner1";
 
-	@CBLNested
-	TPropertyBinaryLength p1 = new TPropertyBinaryLength();
+  @CBLNested
+  TPropertyBinaryLength p1 = new TPropertyBinaryLength();
 
-	@CBLString(10)
-	String inner2 = "inner2";
+  @CBLString(10)
+  String inner2 = "inner2";
 
-	@CBLNested
-	TPropertyBinaryLength p2 = new TPropertyBinaryLength();
+  @CBLNested
+  TPropertyBinaryLength p2 = new TPropertyBinaryLength();
 }

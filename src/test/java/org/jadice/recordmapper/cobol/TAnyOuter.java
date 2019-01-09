@@ -12,7 +12,9 @@ import org.jadice.recordmapper.impl.MarshalContext;
 import org.jadice.recordmapper.impl.UnmarshalContext;
 
 @CBLRecord
-@SeeAlso({NameValueNestedElement.class, NameOnlyNestedElement.class, EmptyNestedElement.class})
+@SeeAlso({
+    NameValueNestedElement.class, NameOnlyNestedElement.class, EmptyNestedElement.class
+})
 public class TAnyOuter {
   public interface SomeNestedElement {
 

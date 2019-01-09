@@ -4,33 +4,33 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class MappingException extends Exception {
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
   private final List<Mapping> ctx = new LinkedList<Mapping>();
 
-	public MappingException(Mapping ctx, String message, Throwable cause) {
-		super(message, cause);
-		
-		if(cause instanceof MappingException)
-		  this.ctx.addAll(((MappingException)cause).ctx);
-		
+  public MappingException(Mapping ctx, String message, Throwable cause) {
+    super(message, cause);
+
+    if (cause instanceof MappingException)
+      this.ctx.addAll(((MappingException) cause).ctx);
+
     this.ctx.add(ctx);
-	}
+  }
 
-	public MappingException(Mapping ctx, String message) {
-		super(message);
-		this.ctx.add(ctx);
-	}
+  public MappingException(Mapping ctx, String message) {
+    super(message);
+    this.ctx.add(ctx);
+  }
 
-	public MappingException(Mapping ctx, Throwable cause) {
-		super(cause);
+  public MappingException(Mapping ctx, Throwable cause) {
+    super(cause);
 
-		if(cause instanceof MappingException)
-      this.ctx.addAll(((MappingException)cause).ctx);
-    
-		this.ctx.add(ctx);
-	}
-	
-	public MappingException(String message) {
+    if (cause instanceof MappingException)
+      this.ctx.addAll(((MappingException) cause).ctx);
+
+    this.ctx.add(ctx);
+  }
+
+  public MappingException(String message) {
     super(message);
   }
 
@@ -43,15 +43,15 @@ public class MappingException extends Exception {
   }
 
   @Override
-	public String toString() {
-	  return super.toString() + formatContext();
-	}
+  public String toString() {
+    return super.toString() + formatContext();
+  }
 
   @Override
-	public String getMessage() {
-	  return super.getMessage() + formatContext();
-	}
-  
+  public String getMessage() {
+    return super.getMessage() + formatContext();
+  }
+
   private String formatContext() {
     return "\n  @" + ctx.toString();
   }

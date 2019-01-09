@@ -7,34 +7,34 @@ import org.jadice.recordmapper.MappingException;
 
 public class UnmarshalSource {
 
-	private final InputStream is;
-	private int position = 0;
+  private final InputStream is;
+  private int position = 0;
 
-	public UnmarshalSource(InputStream is) {
-		this.is = is;
-	}
+  public UnmarshalSource(InputStream is) {
+    this.is = is;
+  }
 
-	public byte[] getBytes(int size) throws MappingException {
-		byte buffer[] = new byte[size];
+  public byte[] getBytes(int size) throws MappingException {
+    byte buffer[] = new byte[size];
 
-		int read = 0;
-		int r;
-		try {
-			while ((r = is.read(buffer, read, size - read)) > 0)
-				read += r;
-		} catch (IOException e) {
-			throw new MappingException( e);
-		}
+    int read = 0;
+    int r;
+    try {
+      while ((r = is.read(buffer, read, size - read)) > 0)
+        read += r;
+    } catch (IOException e) {
+      throw new MappingException(e);
+    }
 
-		if (read != size)
-			throw new MappingException( "Unexpected END_OF_STREAM");
+    if (read != size)
+      throw new MappingException("Unexpected END_OF_STREAM");
 
-		position += size;
+    position += size;
 
-		return buffer;
-	}
+    return buffer;
+  }
 
-	public int getPosition() {
-		return position;
-	}
+  public int getPosition() {
+    return position;
+  }
 }

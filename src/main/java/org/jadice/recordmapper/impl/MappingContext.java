@@ -7,11 +7,11 @@ import org.jadice.recordmapper.MappingException;
 import org.jadice.recordmapper.RecordAttributes;
 
 public interface MappingContext {
-	Object getRecord();
+  Object getRecord();
 
-	<T extends RecordAttributes> T getRecordAttributes(Class<T> c);
+  <T extends RecordAttributes> T getRecordAttributes(Class<T> c);
 
-	Object getValue(Field field) throws MappingException;
+  Object getValue(Field field) throws MappingException;
 
-	Mapping getTarget(String ref);
+  Mapping getTarget(String ref);
 }

@@ -8,7 +8,7 @@ import org.jadice.recordmapper.cobol.CBLTable;
 
 @CBLRecord
 public class TPropertyFixedLengthCollection {
-	@CBLTable
-	@CBLFixedLength(5)
-	public List<TPropertyBinaryLength> properties;
+  @CBLTable
+  @CBLFixedLength(5)
+  public List<TPropertyBinaryLength> properties;
 }

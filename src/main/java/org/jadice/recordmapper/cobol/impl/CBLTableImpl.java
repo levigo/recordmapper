@@ -97,8 +97,8 @@ public class CBLTableImpl extends FieldMapping {
     if (spec.countRef().length() > 0) {
       sizeOrCountField = recordMapping.getFieldMapping(spec.countRef());
     }
-    
-    if(null == sizeOrCountField && fixedLength < 0)
+
+    if (null == sizeOrCountField && fixedLength < 0)
       throw new MappingException(this, "Must have either 'sizeRef', 'countRef' or a fixed length");
   }
 

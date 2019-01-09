@@ -10,7 +10,7 @@
   <inceptionYear>2015</inceptionYear>
   <description>A simple record mapper for mapping Java objects to legacy record formats</description>
   <url>https://github.com/levigo/recordmapper</url>
-  
+
   <organization>
     <name>levigo solutions GmbH</name>
   </organization>

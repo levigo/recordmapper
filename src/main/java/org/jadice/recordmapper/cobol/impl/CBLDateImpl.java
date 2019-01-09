@@ -34,10 +34,8 @@ public class CBLDateImpl extends FieldMapping {
     if (null == date) {
       if (null == spec.nullDate())
         throw new MappingException(
-            "The field "
-                + field
-                + " must not contain a null date unless its @CBLDate annotation specifies a nullDate");
-      if (spec.nullDate().equals("NOW")) 
+            "The field " + field + " must not contain a null date unless its @CBLDate annotation specifies a nullDate");
+      if (spec.nullDate().equals("NOW"))
         date = new Date();
       else {
         ctx.put(spec.nullDate());
