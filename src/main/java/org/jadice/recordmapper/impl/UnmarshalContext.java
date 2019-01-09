@@ -18,4 +18,12 @@ public interface UnmarshalContext extends MappingContext {
   UnmarshalContext createMemberContext(Object member, RecordMapping memberMapping);
 
   int getPosition();
+
+  /**
+   * Return whether any unconsumed input is available
+   * 
+   * @return <code>true</code> if there is more input, <code>false</code> at EOF
+   * @throws MappingException
+   */
+  boolean hasMore() throws MappingException;
 }

@@ -37,4 +37,8 @@ public class UnmarshalSource {
   public int getPosition() {
     return position;
   }
+
+  public boolean hasMore() throws IOException {
+    return is.available() > 0;
+  }
 }

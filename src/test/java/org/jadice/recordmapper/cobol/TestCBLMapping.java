@@ -1,7 +1,6 @@
 package org.jadice.recordmapper.cobol;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -236,6 +235,28 @@ public class TestCBLMapping {
 
     verifyProps(Arrays.asList(c.properties));
   }
+  
+  @Test
+  public void testArrayOfRecordsByStreamLength() throws Exception {
+    final MappingFactory mf = MappingFactory.create(TPropertyArrayUnbounded.class);
+
+    TPropertyArrayUnbounded c = new TPropertyArrayUnbounded();
+    final ArrayList<TPropertyBinaryLength> list = new ArrayList<TPropertyBinaryLength>();
+    fillProps(list, TPropertyBinaryLength.class);
+    c.properties = list.toArray(new TPropertyBinaryLength[5]);
+
+    final ByteArrayOutputStream os = new ByteArrayOutputStream();
+    mf.createMarshaller().marshal(c, os);
+
+    final byte[] bytes = os.toByteArray();
+
+    c = mf.createUnmarshaller().unmarshal(TPropertyArrayUnbounded.class, new ByteArrayInputStream(bytes));
+
+    assertEquals(5, c.properties.length);
+
+    verifyProps(Arrays.asList(c.properties));
+  }
+
 
   @Test
   public void testFixedLength() throws Exception {
