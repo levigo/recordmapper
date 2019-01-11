@@ -69,7 +69,7 @@ public class CBLNumericStringImpl extends FieldMapping {
 
     if (actual > expected)
       throw new MappingException(
-          "Length of value " + value + " for field " + field + " exceeds allowed length(" + expected + ")");
+          "Length of value " + value + " for field " + field + " exceeds allowed length (" + expected + ")");
 
     while (actual < expected) {
       final int pad = Math.min(padding.length(), expected - actual);
