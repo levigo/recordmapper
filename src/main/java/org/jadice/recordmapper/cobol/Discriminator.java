@@ -8,11 +8,17 @@ import org.jadice.recordmapper.impl.MarshalContext;
 import org.jadice.recordmapper.impl.UnmarshalContext;
 
 public interface Discriminator {
-  void init(Class<?> recordClass, Field field) throws MappingException;
+  default void init(Class<?> recordClass, Field field) throws MappingException {
+    // nothing to do
+  };
 
   Class<?> getComponentType(MappingContext ctx) throws MappingException;
 
-  void beforeMarshal(MarshalContext ctx) throws MappingException;
+  default void beforeMarshal(MarshalContext ctx) throws MappingException {
+    // nothing to do
+  };
 
-  void afterUnmarshal(UnmarshalContext ctx) throws MappingException;
+  default void afterUnmarshal(UnmarshalContext ctx) throws MappingException {
+    // nothing to do
+  };
 }

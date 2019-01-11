@@ -4,9 +4,9 @@ import java.lang.reflect.Field;
 
 import org.jadice.recordmapper.MappingException;
 import org.jadice.recordmapper.SeeAlso;
-import org.jadice.recordmapper.cobol.PolymorphicTestRecord.EmptyNestedElement;
-import org.jadice.recordmapper.cobol.PolymorphicTestRecord.NameOnlyNestedElement;
-import org.jadice.recordmapper.cobol.PolymorphicTestRecord.NameValueNestedElement;
+import org.jadice.recordmapper.cobol.TPolymorphicOuterDiscriminator.EmptyNestedElement;
+import org.jadice.recordmapper.cobol.TPolymorphicOuterDiscriminator.NameOnlyNestedElement;
+import org.jadice.recordmapper.cobol.TPolymorphicOuterDiscriminator.NameValueNestedElement;
 import org.jadice.recordmapper.impl.MappingContext;
 import org.jadice.recordmapper.impl.MarshalContext;
 import org.jadice.recordmapper.impl.UnmarshalContext;
@@ -15,7 +15,7 @@ import org.jadice.recordmapper.impl.UnmarshalContext;
 @SeeAlso({
     NameValueNestedElement.class, NameOnlyNestedElement.class, EmptyNestedElement.class
 })
-public class PolymorphicTestRecord {
+public class TPolymorphicOuterDiscriminator {
   public interface SomeNestedElement {
 
   }
@@ -47,7 +47,7 @@ public class PolymorphicTestRecord {
 
     @Override
     public Class<?> getComponentType(MappingContext ctx) throws MappingException {
-      switch (((PolymorphicTestRecord) ctx.getRecord()).type){
+      switch (((TPolymorphicOuterDiscriminator) ctx.getRecord()).type){
         case 0 :
           return EmptyNestedElement.class;
         case 1 :
@@ -60,7 +60,7 @@ public class PolymorphicTestRecord {
 
     @Override
     public void beforeMarshal(MarshalContext ctx) throws MappingException {
-      final PolymorphicTestRecord record = (PolymorphicTestRecord) ctx.getRecord();
+      final TPolymorphicOuterDiscriminator record = (TPolymorphicOuterDiscriminator) ctx.getRecord();
       if (record.nested == null)
         throw new NullPointerException();
       if (record.nested instanceof EmptyNestedElement)
