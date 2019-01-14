@@ -12,7 +12,7 @@ __Maven dependency__
     <dependency>
         <groupId>org.jadice.recordmapper</groupId>
         <artifactId>recordmapper</artifactId>
-        <version>1.1.4</version>
+        <version>1.2.6</version>
     </dependency>
 
 ## License
