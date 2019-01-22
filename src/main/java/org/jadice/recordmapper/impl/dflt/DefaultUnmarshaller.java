@@ -1,5 +1,6 @@
 package org.jadice.recordmapper.impl.dflt;
 
+import java.io.DataInput;
 import java.io.InputStream;
 
 import org.jadice.recordmapper.MappingException;
@@ -14,6 +15,15 @@ public class DefaultUnmarshaller extends DefaultAbstractShaller implements Unmar
   }
 
   public <T extends Object> T unmarshal(Class<T> recordClass, InputStream is) throws MappingException {
+    return unmarshal(recordClass, new InputStreamSource(is));
+  }
+
+  @Override
+  public Object unmarshal(Class<?> recordClass, DataInput di) throws MappingException {
+    return unmarshal(recordClass, new DataInputSource(di));
+  }
+  
+  private <T> T unmarshal(Class<T> recordClass, InputSource src) throws MappingException {
     try {
       T record = recordClass.newInstance();
 
@@ -21,7 +31,7 @@ public class DefaultUnmarshaller extends DefaultAbstractShaller implements Unmar
       if (null == rm)
         throw new MappingException("Don't know how to deal with a " + recordClass);
 
-      DefaultUnmarshalContext ctx = new DefaultUnmarshalContext(new UnmarshalSource(is), this, rm, record);
+      DefaultUnmarshalContext ctx = new DefaultUnmarshalContext(src, this, rm, record);
 
       rm.unmarshal(record, ctx);
       return record;

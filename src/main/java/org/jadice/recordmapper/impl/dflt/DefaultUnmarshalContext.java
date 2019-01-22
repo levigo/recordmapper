@@ -11,13 +11,13 @@ import org.jadice.recordmapper.impl.RecordMapping;
 import org.jadice.recordmapper.impl.UnmarshalContext;
 
 public class DefaultUnmarshalContext implements UnmarshalContext {
-  private final UnmarshalSource src;
+  private final InputSource src;
 
   private final DefaultUnmarshaller unmarshaller;
   private final RecordMapping recordMapping;
   private final Object record;
 
-  public DefaultUnmarshalContext(UnmarshalSource src, DefaultUnmarshaller unmarshaller, RecordMapping recordMapping,
+  public DefaultUnmarshalContext(InputSource src, DefaultUnmarshaller unmarshaller, RecordMapping recordMapping,
       Object record) {
     this.src = src;
 
