@@ -1,7 +1,6 @@
 package org.jadice.recordmapper.impl.dflt;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 
 import org.jadice.recordmapper.BaseRecordAttributes;
@@ -12,13 +11,13 @@ import org.jadice.recordmapper.impl.RecordMapping;
 import org.jadice.recordmapper.impl.UnmarshalContext;
 
 public class DefaultUnmarshalContext implements UnmarshalContext {
-  private final UnmarshalSource src;
+  private final InputSource src;
 
   private final DefaultUnmarshaller unmarshaller;
   private final RecordMapping recordMapping;
   private final Object record;
 
-  public DefaultUnmarshalContext(UnmarshalSource src, DefaultUnmarshaller unmarshaller, RecordMapping recordMapping,
+  public DefaultUnmarshalContext(InputSource src, DefaultUnmarshaller unmarshaller, RecordMapping recordMapping,
       Object record) {
     this.src = src;
 
@@ -101,11 +100,7 @@ public class DefaultUnmarshalContext implements UnmarshalContext {
   }
 
   public String getString(int size) throws MappingException {
-    try {
-      return new String(getBytes(size), getRecordAttributes(BaseRecordAttributes.class).getEncoding());
-    } catch (UnsupportedEncodingException e) {
-      throw new MappingException(e);
-    }
+    return new String(getBytes(size), getRecordAttributes(BaseRecordAttributes.class).getCharset());
   }
 
   @Override
@@ -113,7 +108,7 @@ public class DefaultUnmarshalContext implements UnmarshalContext {
     try {
       return src.hasMore();
     } catch (IOException e) {
-      throw new MappingException( e);
+      throw new MappingException(e);
     }
   }
 }

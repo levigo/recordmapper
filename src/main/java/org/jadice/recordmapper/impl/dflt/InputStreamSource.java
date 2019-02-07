@@ -5,15 +5,18 @@ import java.io.InputStream;
 
 import org.jadice.recordmapper.MappingException;
 
-public class UnmarshalSource {
-
+public class InputStreamSource implements InputSource {
   private final InputStream is;
   private int position = 0;
 
-  public UnmarshalSource(InputStream is) {
+  public InputStreamSource(InputStream is) {
     this.is = is;
   }
 
+  /* (non-Javadoc)
+   * @see org.jadice.recordmapper.impl.dflt.InputSource#getBytes(int)
+   */
+  @Override
   public byte[] getBytes(int size) throws MappingException {
     byte buffer[] = new byte[size];
 
@@ -34,11 +37,17 @@ public class UnmarshalSource {
     return buffer;
   }
 
+  /* (non-Javadoc)
+   * @see org.jadice.recordmapper.impl.dflt.InputSource#getPosition()
+   */
+  @Override
   public int getPosition() {
     return position;
   }
 
+  @Override
   public boolean hasMore() throws IOException {
     return is.available() > 0;
   }
+
 }

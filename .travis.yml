@@ -1,4 +1,4 @@
-maven snapshot delanguage: java
+language: java
 dist: xenial
 jdk:
   - openjdk8

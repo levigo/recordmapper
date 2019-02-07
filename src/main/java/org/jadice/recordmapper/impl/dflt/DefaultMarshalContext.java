@@ -2,7 +2,6 @@ package org.jadice.recordmapper.impl.dflt;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,13 +35,7 @@ public class DefaultMarshalContext implements MarshalContext {
   }
 
   public void put(String s) throws MappingException {
-    BaseRecordAttributes bra = getRecordAttributes(BaseRecordAttributes.class);
-    try {
-      String e = bra.getEncoding();
-      put(s.getBytes(e));
-    } catch (UnsupportedEncodingException e) {
-      throw new MappingException(e);
-    }
+    put(s.getBytes(getRecordAttributes(BaseRecordAttributes.class).getCharset()));
   }
 
   public void put(byte[] buffer) throws MappingException {

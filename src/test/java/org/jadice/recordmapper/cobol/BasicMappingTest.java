@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -198,7 +199,7 @@ public class BasicMappingTest extends AbstractMappingTest {
   public void testUnknownValueWithoutCBLValues() throws Exception {
     final MappingFactory f = MappingFactory.create(EnumClass13.class);
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final EnumClass13 ec1out = u.unmarshal(EnumClass13.class, new ByteArrayInputStream("XYZ".getBytes()));
 
@@ -225,10 +226,10 @@ public class BasicMappingTest extends AbstractMappingTest {
   public void testEnumWithCBLValues() throws Exception {
     final MappingFactory f = MappingFactory.create(EnumClass2.class);
     final Marshaller m = f.createMarshaller();
-    m.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    m.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     for (final MyEnumWithCBLValues e : MyEnumWithCBLValues.values()) {
       final EnumClass2 ec = new EnumClass2();
@@ -299,7 +300,7 @@ public class BasicMappingTest extends AbstractMappingTest {
   public void testUnknownValueWithCBLValues() throws Exception {
     final MappingFactory f = MappingFactory.create(EnumClass23.class);
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final EnumClass23 ec1out = u.unmarshal(EnumClass23.class, new ByteArrayInputStream("XYZ  ".getBytes()));
 
@@ -324,7 +325,7 @@ public class BasicMappingTest extends AbstractMappingTest {
     final MappingFactory f = MappingFactory.create(MyTestClass1.class);
     final Marshaller m = f.createMarshaller();
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final MyTestClass1 tc = new MyTestClass1();
 
@@ -356,7 +357,7 @@ public class BasicMappingTest extends AbstractMappingTest {
     final MappingFactory f = MappingFactory.create(MyTestClass1.class);
     final Marshaller m = f.createMarshaller();
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final MyTestClass1 tc = new MyTestClass1();
 
@@ -425,7 +426,7 @@ public class BasicMappingTest extends AbstractMappingTest {
     final MappingFactory f = MappingFactory.create(MyTestClass2.class);
     final Marshaller m = f.createMarshaller();
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final MyTestClass2 tc = new MyTestClass2();
     tc.mybyte = Byte.MAX_VALUE - 1;
@@ -484,7 +485,7 @@ public class BasicMappingTest extends AbstractMappingTest {
     final MappingFactory f = MappingFactory.create(MyTestClass2.class);
     final Marshaller m = f.createMarshaller();
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final MyTestClass2 tc = new MyTestClass2();
 
@@ -548,7 +549,7 @@ public class BasicMappingTest extends AbstractMappingTest {
     final MappingFactory f = MappingFactory.create(MyTestClass4.class);
     final Marshaller m = f.createMarshaller();
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final MyTestClass4 tc = new MyTestClass4();
     tc.mybyte = Byte.MAX_VALUE - 1;
