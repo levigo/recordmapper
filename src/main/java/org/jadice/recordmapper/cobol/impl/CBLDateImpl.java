@@ -1,6 +1,8 @@
 package org.jadice.recordmapper.cobol.impl;
 
 import java.lang.annotation.Annotation;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,9 +27,10 @@ import org.jadice.recordmapper.impl.UnmarshalContext;
 
 public class CBLDateImpl extends FieldMapping {
   private CBLDate spec;
-  private DateTimeFormatter dateFormat;
+  private DateTimeFormatter dateTimeFormatter;
 
   private ZoneId zoneId;
+  private SafeSimpleDateFormat dateFormat;
 
   protected void init(Annotation a) throws MappingException {
     this.spec = (CBLDate) a;
@@ -51,7 +54,7 @@ public class CBLDateImpl extends FieldMapping {
   }
 
   public void marshal(MarshalContext ctx, Object value) throws MappingException {
-    DateTimeFormatter df = getDateFormat();
+    DateTimeFormatter df = getDateTimeFormatter();
 
     if (null == value) {
       if (null == spec.nullDate())
@@ -73,8 +76,13 @@ public class CBLDateImpl extends FieldMapping {
     else
       throw new IllegalArgumentException("Don't know how to marshal a " + value.getClass());
 
-    if (temp instanceof Instant && null != zoneId) {
-      temp = ((Instant) temp).atZone(zoneId);
+    if (temp instanceof Instant) {
+      if (null != zoneId) {
+        temp = ((Instant) temp).atZone(zoneId);
+      } else {
+        // use default zone
+        temp = ((Instant) temp).atZone(ZoneId.systemDefault());
+      }
     }
 
     ctx.put(df.format(temp));
@@ -85,48 +93,53 @@ public class CBLDateImpl extends FieldMapping {
     if (s.trim().isEmpty())
       return null;
 
-    DateTimeFormatter df = getDateFormat();
-
     try {
       Object value;
       Class<?> type = field.getType();
       if (type.isAssignableFrom(TemporalAccessor.class))
-        value = df.parse(s);
+        value = getDateTimeFormatter().parse(s);
       else if (type.isAssignableFrom(Instant.class)) {
-        value = df.parse(s, Instant::from);
+        value = getDateTimeFormatter().parse(s, Instant::from);
       } else if (type.isAssignableFrom(LocalDateTime.class))
-        value = df.parse(s, LocalDateTime::from);
+        value = getDateTimeFormatter().parse(s, LocalDateTime::from);
       else if (type.isAssignableFrom(LocalDate.class))
-        value = df.parse(s, LocalDate::from);
+        value = getDateTimeFormatter().parse(s, LocalDate::from);
       else if (type.isAssignableFrom(LocalTime.class))
-        value = df.parse(s, LocalTime::from);
+        value = getDateTimeFormatter().parse(s, LocalTime::from);
       else if (type.isAssignableFrom(OffsetDateTime.class))
-        value = df.parse(s, OffsetDateTime::from);
+        value = getDateTimeFormatter().parse(s, OffsetDateTime::from);
       else if (type.isAssignableFrom(OffsetTime.class))
-        value = df.parse(s, OffsetTime::from);
+        value = getDateTimeFormatter().parse(s, OffsetTime::from);
       else if (type.isAssignableFrom(ZonedDateTime.class))
-        value = df.parse(s, ZonedDateTime::from);
+        value = getDateTimeFormatter().parse(s, ZonedDateTime::from);
       else if (type.isAssignableFrom(Date.class))
-        value = Date.from(df.parse(s, Instant::from));
+        value = getDateFormat().parse(s);
       else
         throw new IllegalArgumentException("Don't know how to unmarshal into a " + type);
 
       return value;
-    } catch (DateTimeParseException e) {
+    } catch (DateTimeParseException | ParseException e) {
       throw new MappingException(this, e);
     }
   }
 
-  private DateTimeFormatter getDateFormat() {
-    if (null == dateFormat) {
+  private DateFormat getDateFormat() {
+    if (null == dateFormat)
+      dateFormat = new SafeSimpleDateFormat(spec.value());
+    return dateFormat;
+  }
+
+  private DateTimeFormatter getDateTimeFormatter() {
+    if (null == dateTimeFormatter) {
       DateTimeFormatterBuilder b = new DateTimeFormatterBuilder() //
+          .parseLenient()
           .appendPattern(spec.value());
 
-      dateFormat = b.toFormatter();
+      dateTimeFormatter = b.toFormatter();
 
       if (null != zoneId)
-        dateFormat = dateFormat.withZone(zoneId);
+        dateTimeFormatter = dateTimeFormatter.withZone(zoneId);
     }
-    return dateFormat;
+    return dateTimeFormatter;
   }
 }
