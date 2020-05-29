@@ -32,15 +32,15 @@ public class CBLDateImpl extends FieldMapping {
   private ZoneId zoneId;
   private SafeSimpleDateFormat dateFormat;
 
-  protected void init(Annotation a) throws MappingException {
+  protected void init(final Annotation a) throws MappingException {
     this.spec = (CBLDate) a;
 
     if (this.spec.zoneId().length() > 0 && this.spec.zoneOffset().length() > 0)
-      throw new MappingException("CBLDate allows either zoneId or zoneOffset, not both at " + this);
+      throw new MappingException(this, "CBLDate allows either zoneId or zoneOffset, not both at " + this);
 
     if ((this.spec.zoneId().length() > 0 || this.spec.zoneOffset().length() > 0)
         && !(Instant.class.isAssignableFrom(field.getType())))
-      throw new MappingException(
+      throw new MappingException(this, 
           "Can use zoneId or zoneOffset only in conjunction with a field of type Instant at " + this);
 
     if (this.spec.zoneId().length() > 0)
@@ -49,16 +49,16 @@ public class CBLDateImpl extends FieldMapping {
       zoneId = ZoneOffset.of(this.spec.zoneOffset());
   }
 
-  public int getSize(MappingContext ctx) {
+  public int getSize(final MappingContext ctx) {
     return spec.value().length();
   }
 
-  public void marshal(MarshalContext ctx, Object value) throws MappingException {
+  public void marshal(final MarshalContext ctx, Object value) throws MappingException {
     DateTimeFormatter df = getDateTimeFormatter();
 
     if (null == value) {
       if (null == spec.nullDate())
-        throw new MappingException(
+        throw new MappingException(this, 
             "The field " + field + " must not contain a null date unless its @CBLDate annotation specifies a nullDate");
       if (spec.nullDate().equals("NOW"))
         value = Instant.now();
@@ -88,7 +88,7 @@ public class CBLDateImpl extends FieldMapping {
     ctx.put(df.format(temp));
   }
 
-  public Object unmarshal(UnmarshalContext ctx) throws MappingException {
+  public Object unmarshal(final UnmarshalContext ctx) throws MappingException {
     String s = ctx.getString(getSize(ctx));
     if (s.trim().isEmpty())
       return null;

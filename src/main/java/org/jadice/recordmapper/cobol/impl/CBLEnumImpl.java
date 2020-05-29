@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jadice.recordmapper.Mapping;
 import org.jadice.recordmapper.MappingException;
 import org.jadice.recordmapper.cobol.CBLEnum;
 import org.jadice.recordmapper.cobol.CBLEnumValue;
@@ -16,6 +17,23 @@ import org.jadice.recordmapper.impl.MarshalContext;
 import org.jadice.recordmapper.impl.UnmarshalContext;
 
 public class CBLEnumImpl extends FieldMapping {
+  private static class EnumValueMapping extends Mapping {
+    private final Field field;
+
+    public EnumValueMapping(final Field enumValueField) {
+      this.field = enumValueField;
+    }
+
+    @Override
+    public int getSize(final MappingContext ctx) throws MappingException {
+      return 0;
+    }
+    
+    @Override
+    public String toString() {
+      return field.getDeclaringClass().getSimpleName() + "." + field.getName();
+    }
+  }
   private String padding;
 
   private CBLEnum spec;
@@ -38,7 +56,7 @@ public class CBLEnumImpl extends FieldMapping {
     padding = new String(p);
 
     if (!Enum.class.isAssignableFrom(field.getType()))
-      throw new MappingException("The field " + field + " must be an enum type to be mapped using @CBLEnum");
+      throw new MappingException(this, "The field " + field + " must be an enum type to be mapped using @CBLEnum");
 
     try {
       final Method valuesM = field.getType().getMethod("values");
@@ -49,23 +67,25 @@ public class CBLEnumImpl extends FieldMapping {
         String cblValue = enumValue.name();
         final Field enumValueField = field.getType().getField(cblValue);
         final CBLEnumValue v = enumValueField.getAnnotation(CBLEnumValue.class);
-        if(null != v) {
+        if (null != v) {
           cblValue = v.value();
-          
-          for(String alias : v.aliases()) {
-            if(cblValues2enum.containsKey(alias))
-                throw new MappingException("The enum value alias '" + alias + "' is used more than once at field " + field);
+
+          for (String alias : v.aliases()) {
+            if (cblValues2enum.containsKey(alias))
+              throw new MappingException(this,
+                  "The enum value alias '" + alias + "' is used more than once at field " + field);
             cblValues2enum.put(alias, (Enum<?>) enumValue);
           }
         }
-        
+
         if (cblValue.length() > spec.value())
-          throw new MappingException("The enum value " + cblValue + " is longer than the allocated field length");
-        
+          throw new MappingException(new EnumValueMapping(enumValueField), "The enum value " + cblValue + " is longer than the allocated field length");
+
         enum2cblValues.put((Enum<?>) value, cblValue);
 
-        if(cblValues2enum.containsKey(cblValue))
-            throw new MappingException("The enum value '" + cblValue + "' is used more than once at field " + field);
+        if (cblValues2enum.containsKey(cblValue))
+          throw new MappingException(new EnumValueMapping(enumValueField),
+              "The enum value '" + cblValue + "' is used more than once at field " + field);
         cblValues2enum.put(cblValue, (Enum<?>) enumValue);
       }
 
@@ -75,13 +95,11 @@ public class CBLEnumImpl extends FieldMapping {
         else
           unknownValue = Enum.valueOf((Class) field.getType(), spec.unknownValue());
         if (null == unknownValue)
-          throw new MappingException("The unknown value " + spec.unknownValue()
+          throw new MappingException(this, "The unknown value " + spec.unknownValue()
               + " has no representation in the corresponding enum " + field.getType());
       }
-    } catch (final MappingException e) {
-      throw e;
     } catch (final Exception e) {
-      throw new MappingException("Can't extract enum values from an enum implementing CBLEnumValue", e);
+      throw new MappingException(this, "Can't extract enum values from an enum implementing CBLEnumValue", e);
     }
   }
 
@@ -134,8 +152,8 @@ public class CBLEnumImpl extends FieldMapping {
       if (null != unknownValue)
         enumValue = unknownValue;
       else
-        throw new MappingException("The value '" + s
-                + "' cannot be mapped to a corresponding enum value and there is no unknown value defined.");
+        throw new MappingException(this, "The value '" + s
+            + "' cannot be mapped to a corresponding enum value and there is no unknown value defined.");
 
     return enumValue;
   }

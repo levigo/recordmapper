@@ -20,7 +20,7 @@ public class CBLNestedImpl extends FieldMapping {
   private RecordMapping componentMapping;
 
   @Override
-  protected void init(Annotation a) throws MappingException {
+  protected void init(final Annotation a) throws MappingException {
     // this.spec = (CBLNested) a;
 
     // determine member type
@@ -46,7 +46,7 @@ public class CBLNestedImpl extends FieldMapping {
   }
 
   @Override
-  public int getSize(MappingContext ctx) throws MappingException {
+  public int getSize(final MappingContext ctx) throws MappingException {
     if (!(ctx instanceof MarshalContext))
       throw new MappingException(this, "I am not supposed to know my size at this point");
 
@@ -54,12 +54,12 @@ public class CBLNestedImpl extends FieldMapping {
   }
 
   @Override
-  public void marshal(MarshalContext ctx, Object value) throws MappingException {
+  public void marshal(final MarshalContext ctx, final Object value) throws MappingException {
     componentMapping.marshal(value, ctx.getMemberContext(value));
   }
 
   @Override
-  public Object unmarshal(UnmarshalContext ctx) throws MappingException {
+  public Object unmarshal(final UnmarshalContext ctx) throws MappingException {
     Object component;
     try {
       component = componentType.newInstance();
@@ -73,7 +73,7 @@ public class CBLNestedImpl extends FieldMapping {
   }
 
   @Override
-  public void registerParameterField(FieldMapping param) throws MappingException {
+  public void registerParameterField(final FieldMapping param) throws MappingException {
     // we don't care, but let a size field have its way anyway.
   }
 }

@@ -12,11 +12,11 @@ public class DataInputSource implements InputSource {
 
   private int peeked = -1;
 
-  public DataInputSource(DataInput di) {
+  public DataInputSource(final DataInput di) {
     this.di = di;
   }
 
-  public byte[] getBytes(int size) throws MappingException {
+  public byte[] getBytes(final int size) throws MappingException {
     byte buffer[] = new byte[size];
 
     if (size > 0)
@@ -28,7 +28,7 @@ public class DataInputSource implements InputSource {
         } else
           di.readFully(buffer);
       } catch (IOException e) {
-        throw new MappingException(e);
+        throw new MappingException("Can't read", e);
       }
 
     position += size;

@@ -20,7 +20,7 @@ public class CBLAnyNestedImpl extends FieldMapping {
   private Discriminator discriminator;
 
   @Override
-  protected void init(Annotation a) throws MappingException {
+  protected void init(final Annotation a) throws MappingException {
     spec = (CBLAnyNested) a;
 
     try {
@@ -38,14 +38,14 @@ public class CBLAnyNestedImpl extends FieldMapping {
   }
 
   @Override
-  public int getSize(MappingContext ctx) throws MappingException {
+  public int getSize(final MappingContext ctx) throws MappingException {
     if (!(ctx instanceof MarshalContext))
       throw new MappingException(this, "I am not supposed to know my size at this point");
 
     return getComponentMapping(ctx).getSize(((MarshalContext) ctx).getMemberContext(ctx.getValue(field)));
   }
 
-  private RecordMapping getComponentMapping(MarshalContext ctx, Object value) throws MappingException {
+  private RecordMapping getComponentMapping(final MarshalContext ctx, final Object value) throws MappingException {
     if (null != value) {
       final RecordMapping valueMapping = recordMapping.getRecordMapping(value.getClass());
       if (null != valueMapping)
@@ -55,7 +55,7 @@ public class CBLAnyNestedImpl extends FieldMapping {
     return getComponentMapping(ctx);
   }
 
-  private RecordMapping getComponentMapping(MappingContext ctx) throws MappingException {
+  private RecordMapping getComponentMapping(final MappingContext ctx) throws MappingException {
     final Class<?> c = discriminator.getComponentType(ctx);
     final RecordMapping componentMapping = recordMapping.getRecordMapping(c);
     if (null == componentMapping)
@@ -64,12 +64,12 @@ public class CBLAnyNestedImpl extends FieldMapping {
   }
 
   @Override
-  public void marshal(MarshalContext ctx, Object value) throws MappingException {
+  public void marshal(final MarshalContext ctx, final Object value) throws MappingException {
     getComponentMapping(ctx, value).marshal(value, ctx.getMemberContext(value));
   }
 
   @Override
-  public Object unmarshal(UnmarshalContext ctx) throws MappingException {
+  public Object unmarshal(final UnmarshalContext ctx) throws MappingException {
     Object component;
     try {
       final RecordMapping componentMapping = getComponentMapping(ctx);
@@ -85,17 +85,17 @@ public class CBLAnyNestedImpl extends FieldMapping {
   }
 
   @Override
-  public void registerParameterField(FieldMapping param) throws MappingException {
+  public void registerParameterField(final FieldMapping param) throws MappingException {
     // we don't care, but let a size field have its way anyway.
   }
 
   @Override
-  public void beforeMarshal(MarshalContext mc) throws MappingException {
+  public void beforeMarshal(final MarshalContext mc) throws MappingException {
     discriminator.beforeMarshal(mc);
   }
 
   @Override
-  public void afterUnmarshal(UnmarshalContext mc) throws MappingException {
+  public void afterUnmarshal(final UnmarshalContext mc) throws MappingException {
     discriminator.afterUnmarshal(mc);
   }
 }

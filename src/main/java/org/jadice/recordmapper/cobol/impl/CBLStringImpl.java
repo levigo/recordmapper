@@ -15,7 +15,7 @@ public class CBLStringImpl extends FieldMapping {
 
   private CBLString spec;
 
-  protected void init(Annotation a) {
+  protected void init(final Annotation a) {
     this.spec = (CBLString) a;
 
     char p[] = new char[spec.value()];
@@ -24,15 +24,15 @@ public class CBLStringImpl extends FieldMapping {
     padding = new String(p);
   }
 
-  public int getSize(MappingContext ctx) {
+  public int getSize(final MappingContext ctx) {
     return spec.value();
   }
 
-  public void marshal(MarshalContext ctx, Object value) throws MappingException {
+  public void marshal(final MarshalContext ctx, final Object value) throws MappingException {
     ctx.put(adjustLength(null != value ? (String) value : "", ctx));
   }
 
-  private String adjustLength(String value, MappingContext ctx) throws MappingException {
+  private String adjustLength(String value, final MappingContext ctx) throws MappingException {
     int expected = getSize(ctx);
     int actual = value.length();
 
@@ -41,7 +41,7 @@ public class CBLStringImpl extends FieldMapping {
         value = value.substring(0, expected);
         actual = expected;
       } else
-        throw new MappingException(
+        throw new MappingException(this, 
             "Length of value " + value + " for field " + field + " exceeds allowed length(" + expected + ")");
     }
 
@@ -54,7 +54,7 @@ public class CBLStringImpl extends FieldMapping {
     return value;
   }
 
-  public Object unmarshal(UnmarshalContext ctx) throws MappingException {
+  public Object unmarshal(final UnmarshalContext ctx) throws MappingException {
     String s = ctx.getString(getSize(ctx));
     return s.trim();
   }

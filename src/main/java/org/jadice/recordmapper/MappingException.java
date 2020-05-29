@@ -2,49 +2,43 @@ package org.jadice.recordmapper;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MappingException extends Exception {
   private static final long serialVersionUID = 1L;
   private final List<Mapping> ctx = new LinkedList<Mapping>();
 
-  public MappingException(Mapping ctx, String message, Throwable cause) {
-    super(message, cause);
+  public MappingException(final Mapping ctx, final String message, final Throwable cause) {
+    super(cause instanceof MappingException ? message + ": " + ((MappingException) cause).rawMessage() : message,
+        cause);
 
     if (cause instanceof MappingException)
-      this.ctx.addAll(((MappingException) cause).ctx);
+      this.ctx.addAll(0, ((MappingException) cause).ctx);
 
-    this.ctx.add(ctx);
+    this.ctx.add(0, ctx);
   }
 
-  public MappingException(Mapping ctx, String message) {
+  public MappingException(final Mapping ctx, final String message) {
     super(message);
-    this.ctx.add(ctx);
+    this.ctx.add(0, ctx);
   }
 
-  public MappingException(Mapping ctx, Throwable cause) {
-    super(cause);
+  public MappingException(final Mapping ctx, final Throwable cause) {
+    super(cause instanceof MappingException ? ((MappingException) cause).rawMessage() : cause.getLocalizedMessage(),
+        cause);
 
     if (cause instanceof MappingException)
-      this.ctx.addAll(((MappingException) cause).ctx);
+      this.ctx.addAll(0, ((MappingException) cause).ctx);
 
-    this.ctx.add(ctx);
+    this.ctx.add(0, ctx);
   }
 
-  public MappingException(String message) {
+  public MappingException(final String message) {
     super(message);
   }
 
-  public MappingException(Exception cause) {
-    super(cause);
-  }
-
-  public MappingException(String message, Throwable cause) {
+  public MappingException(final String message, final Throwable cause) {
     super(message, cause);
-  }
-
-  @Override
-  public String toString() {
-    return super.toString() + formatContext();
   }
 
   @Override
@@ -52,7 +46,11 @@ public class MappingException extends Exception {
     return super.getMessage() + formatContext();
   }
 
+  private String rawMessage() {
+    return super.getMessage();
+  }
+
   private String formatContext() {
-    return "\n  @" + ctx.toString();
+    return "\n  @" + ctx.stream().map(Object::toString).collect(Collectors.joining(" -> "));
   }
 }

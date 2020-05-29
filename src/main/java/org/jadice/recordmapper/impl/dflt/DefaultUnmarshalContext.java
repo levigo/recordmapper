@@ -17,8 +17,8 @@ public class DefaultUnmarshalContext implements UnmarshalContext {
   private final RecordMapping recordMapping;
   private final Object record;
 
-  public DefaultUnmarshalContext(InputSource src, DefaultUnmarshaller unmarshaller, RecordMapping recordMapping,
-      Object record) {
+  public DefaultUnmarshalContext(final InputSource src, final DefaultUnmarshaller unmarshaller, final RecordMapping recordMapping,
+      final Object record) {
     this.src = src;
 
     this.unmarshaller = unmarshaller;
@@ -26,30 +26,30 @@ public class DefaultUnmarshalContext implements UnmarshalContext {
     this.record = record;
   }
 
-  public DefaultUnmarshalContext(DefaultUnmarshalContext parent, RecordMapping recordMapping, Object record) {
+  public DefaultUnmarshalContext(final DefaultUnmarshalContext parent, final RecordMapping recordMapping, final Object record) {
     this.src = parent.src;
     this.unmarshaller = parent.unmarshaller;
     this.recordMapping = recordMapping;
     this.record = record;
   }
 
-  public <T extends RecordAttributes> T getRecordAttributes(Class<T> c) {
+  public <T extends RecordAttributes> T getRecordAttributes(final Class<T> c) {
     return unmarshaller.getRecordAttributes(c);
   }
 
-  public Mapping getTarget(String ref) {
+  public Mapping getTarget(final String ref) {
     return recordMapping.getFieldMapping(ref);
   }
 
-  public Object getValue(Field field) throws MappingException {
+  public Object getValue(final Field field) throws MappingException {
     try {
       return field.get(record);
     } catch (Exception e) {
-      throw new MappingException(e);
+      throw new MappingException("Can't get field value for " + field, e);
     }
   }
 
-  public void setValue(Field field, Object value) throws MappingException {
+  public void setValue(final Field field, final Object value) throws MappingException {
     try {
       field.set(record, prepareValue(field, value));
     } catch (Exception e) {
@@ -64,7 +64,7 @@ public class DefaultUnmarshalContext implements UnmarshalContext {
    * @param value
    * @return
    */
-  private Object prepareValue(Field field, Object value) {
+  private Object prepareValue(final Field field, Object value) {
     Class<?> t = field.getType();
 
     if (t.equals(byte.class) || t.equals(Byte.class))
@@ -83,7 +83,7 @@ public class DefaultUnmarshalContext implements UnmarshalContext {
     return value;
   }
 
-  public UnmarshalContext createMemberContext(Object member, RecordMapping memberMapping) {
+  public UnmarshalContext createMemberContext(final Object member, final RecordMapping memberMapping) {
     return new DefaultUnmarshalContext(this, memberMapping, member);
   }
 
@@ -91,7 +91,7 @@ public class DefaultUnmarshalContext implements UnmarshalContext {
     return record;
   }
 
-  public byte[] getBytes(int size) throws MappingException {
+  public byte[] getBytes(final int size) throws MappingException {
     return src.getBytes(size);
   }
 
@@ -99,7 +99,7 @@ public class DefaultUnmarshalContext implements UnmarshalContext {
     return src.getPosition();
   }
 
-  public String getString(int size) throws MappingException {
+  public String getString(final int size) throws MappingException {
     return new String(getBytes(size), getRecordAttributes(BaseRecordAttributes.class).getCharset());
   }
 
@@ -108,7 +108,7 @@ public class DefaultUnmarshalContext implements UnmarshalContext {
     try {
       return src.hasMore();
     } catch (IOException e) {
-      throw new MappingException(e);
+      throw new MappingException("hasMore failed", e);
     }
   }
 }

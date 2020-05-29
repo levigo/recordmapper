@@ -9,7 +9,7 @@ public class InputStreamSource implements InputSource {
   private final InputStream is;
   private int position = 0;
 
-  public InputStreamSource(InputStream is) {
+  public InputStreamSource(final InputStream is) {
     this.is = is;
   }
 
@@ -17,7 +17,7 @@ public class InputStreamSource implements InputSource {
    * @see org.jadice.recordmapper.impl.dflt.InputSource#getBytes(int)
    */
   @Override
-  public byte[] getBytes(int size) throws MappingException {
+  public byte[] getBytes(final int size) throws MappingException {
     byte buffer[] = new byte[size];
 
     int read = 0;
@@ -26,7 +26,7 @@ public class InputStreamSource implements InputSource {
       while ((r = is.read(buffer, read, size - read)) > 0)
         read += r;
     } catch (IOException e) {
-      throw new MappingException(e);
+      throw new MappingException("Can't read", e);
     }
 
     if (read != size)
