@@ -267,7 +267,7 @@ public class TestCBLMapping {
     verifyProps(c.properties);
   }
 
-  private void verifyProps(List<? extends TProperty> l) {
+  private void verifyProps(final List<? extends TProperty> l) {
     for (int i = 0; i < 5; i++) {
       final String value = "Foo" + "ABCDEFGHI".substring(0, i);
       assertEquals("Foo" + i, l.get(i).getName());
@@ -275,7 +275,7 @@ public class TestCBLMapping {
     }
   }
 
-  private <T extends TProperty> void fillProps(List<T> l, Class<T> c) throws Exception {
+  private <T extends TProperty> void fillProps(final List<T> l, final Class<T> c) throws Exception {
     for (int i = 0; i < 5; i++) {
       final String value = "Foo" + "ABCDEFGHI".substring(0, i);
 
@@ -431,7 +431,7 @@ public class TestCBLMapping {
 
   // ******************************************************
   public enum MyEnumWithCBLValues {
-    @CBLEnumValue("v_foo") FOO,
+    @CBLEnumValue(value = "v_foo", aliases = {"v_as1", "v_as2"}) FOO,
     @CBLEnumValue("v_bar") BAR,
     @CBLEnumValue("v_baz") BAZ,
     @CBLEnumValue("v_a") A,
@@ -527,6 +527,16 @@ public class TestCBLMapping {
     final EnumClass23 ec1out = u.unmarshal(EnumClass23.class, new ByteArrayInputStream("XYZ  ".getBytes()));
 
     Assert.assertEquals(MyEnumWithCBLValues.BAZ, ec1out.foo);
+  }
+  
+  @Test
+  public void testAliasesWithCBLValues() throws Exception {
+    final MappingFactory f = MappingFactory.create(EnumClass23.class);
+    final Unmarshaller u = f.createUnmarshaller();
+    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    
+    Assert.assertEquals(MyEnumWithCBLValues.FOO, u.unmarshal(EnumClass23.class, new ByteArrayInputStream("v_as1".getBytes())).foo);
+    Assert.assertEquals(MyEnumWithCBLValues.FOO, u.unmarshal(EnumClass23.class, new ByteArrayInputStream("v_as2".getBytes())).foo);
   }
 
   // *****************************************
@@ -735,7 +745,7 @@ public class TestCBLMapping {
     Assert.assertEquals(tcu.myDouble, new Double(0));
   }
 
-  ByteArrayOutputStream marshalAndVerify(final Marshaller m, final Object target, String expected)
+  ByteArrayOutputStream marshalAndVerify(final Marshaller m, final Object target, final String expected)
       throws MappingException {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     m.marshal(target, baos);
@@ -823,7 +833,7 @@ public class TestCBLMapping {
     Assert.assertEquals(tcu.myLong, new Long(Long.MAX_VALUE - 1));
   }
 
-  private static String toHexString(byte[] b) {
+  private static String toHexString(final byte[] b) {
     StringBuilder buf = new StringBuilder();
     for (int i = 0; i < b.length; i++) {
       String s = Integer.toHexString(b[i] & 0xff).toUpperCase();
