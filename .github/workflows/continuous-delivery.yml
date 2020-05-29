@@ -71,8 +71,8 @@ jobs:
             GPG_OWNERTRUST: ${{ secrets.LEVIGO_GPG_OWNERTRUST }}
             
       run: |
-        echo "$GPG_SECRET_KEYS" | base64 --decode | $GPG_EXECUTABLE --import
-        echo "$GPG_OWNERTRUST" | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+        echo "$GPG_SECRET_KEYS" | base64 --decode | $GPG_EXECUTABLE --import --no-tty --batch --yes
+        echo "$GPG_OWNERTRUST" | base64 --decode | $GPG_EXECUTABLE --import-ownertrust --no-tty --batch --yes
         mvn deploy --settings .maven.xml -Dmaven.test.skip.exec=true -B -U -Prelease
         
     ## Update README.md
