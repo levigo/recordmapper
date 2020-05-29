@@ -66,14 +66,14 @@ jobs:
     ## Deploy
     - name: Deploy package
       env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            REPOSITORY_URL: ${{ secrets.REPOSITORY_URL }}
-            REPOSITORY_USERID: ${{ secrets.REPOSITORY_USERID }}
-            REPOSITORY_CREDENTIALS: ${{ secrets.REPOSITORY_CREDENTIALS }}
+            GPG_EXECUTABLE: gpg
+            GPG_SECRET_KEYS: ${{ secrets.LEVIGO_GPG_KEYS }}
+            GPG_OWNERTRUST: ${{ secrets.LEVIGO_GPG_OWNERTRUST }}
+            
       run: |
-        mkdir -p ~/.m2
-        echo "<settings><servers><server><id>neverpile</id><username>${REPOSITORY_USERID}</username><password>${REPOSITORY_CREDENTIALS}</password></server></servers></settings>" > ~/.m2/settings.xml 
-        mvn deploy -Dmaven.test.skip.exec=true -DaltDeploymentRepository=neverpile::default::${REPOSITORY_URL}
+        echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
+        echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+        mvn deploy --settings .maven.xml -Dmaven.test.skip.exec=true -B -U -Prelease
         
     ## Update README.md
     - name: Edit README.md to contain version number
