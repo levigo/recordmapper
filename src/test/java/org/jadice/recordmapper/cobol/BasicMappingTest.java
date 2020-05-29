@@ -6,6 +6,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -701,6 +703,34 @@ public class BasicMappingTest extends AbstractMappingTest {
     } catch (final MappingException e) {
       assertThat(e.getMessage()).startsWith(
           "Length of value 4711 for field int " + MyTestClass3.class.getName() + ".foo exceeds allowed length (3)");
+    }
+  }
+  
+  @CBLRecord
+  public static class DiagContextOuter {
+    @CBLNested
+    public DiagContextInner inner;
+  }
+
+  @CBLRecord
+  public static class DiagContextInner {
+    @CBLNumericString(1)
+    public int foo;
+  }
+  
+  @Test
+  public void testDiagnosticContext() throws Exception {
+    final MappingFactory mf = MappingFactory.create(DiagContextOuter.class);
+    try {
+      mf.createUnmarshaller().unmarshal(DiagContextOuter.class, new ByteArrayInputStream("foo".getBytes()));
+    } catch (MappingException e) {
+      StringWriter sw = new StringWriter();
+      e.printStackTrace(new PrintWriter(sw));
+      String trace = sw.toString();
+      
+      assertThat(trace).contains("NumberFormatException");
+      assertThat(trace).contains("@DiagContextOuter.inner -> DiagContextInner.foo");
+      assertThat(trace).contains("@DiagContextInner.foo");
     }
   }
 }

@@ -22,51 +22,51 @@ public class DefaultMarshalContext implements MarshalContext {
 
   private final Map<Object, DefaultMarshalContext> memberContexts = new HashMap<Object, DefaultMarshalContext>();
 
-  public DefaultMarshalContext(DefaultMarshalContext parent, DefaultMarshaller marshaller, RecordMapping recordMapping,
-      Object record, OutputStream os) {
+  public DefaultMarshalContext(final DefaultMarshalContext parent, final DefaultMarshaller marshaller, final RecordMapping recordMapping,
+      final Object record, final OutputStream os) {
     this.marshaller = marshaller;
     this.recordMapping = recordMapping;
     this.record = record;
     this.os = os;
   }
 
-  public <T extends RecordAttributes> T getRecordAttributes(Class<T> c) {
+  public <T extends RecordAttributes> T getRecordAttributes(final Class<T> c) {
     return marshaller.getRecordAttributes(c);
   }
 
-  public void put(String s) throws MappingException {
+  public void put(final String s) throws MappingException {
     put(s.getBytes(getRecordAttributes(BaseRecordAttributes.class).getCharset()));
   }
 
-  public void put(byte[] buffer) throws MappingException {
+  public void put(final byte[] buffer) throws MappingException {
     try {
       os.write(buffer);
     } catch (IOException e) {
-      throw new MappingException(e);
+      throw new MappingException("Can't write", e);
     }
   }
 
-  public void put(byte b) throws MappingException {
+  public void put(final byte b) throws MappingException {
     try {
       os.write(b);
     } catch (IOException e) {
-      throw new MappingException(e);
+      throw new MappingException("Can't write", e);
     }
   }
 
-  public Object getValue(Field fieldRef) throws MappingException {
+  public Object getValue(final Field fieldRef) throws MappingException {
     try {
       return fieldRef.get(record);
     } catch (Exception e) {
-      throw new MappingException(e);
+      throw new MappingException("Can't get value from " + fieldRef, e);
     }
   }
 
-  public Mapping getTarget(String ref) {
+  public Mapping getTarget(final String ref) {
     return recordMapping.getFieldMapping(ref);
   }
 
-  public MarshalContext getMemberContext(Object record) {
+  public MarshalContext getMemberContext(final Object record) {
     DefaultMarshalContext mc = memberContexts.get(record);
     if (null == mc) {
       mc = new DefaultMarshalContext(this, marshaller, recordMapping, record, os);
