@@ -7,9 +7,11 @@ import java.lang.annotation.Target;
 
 import org.jadice.recordmapper.impl.Auxiliary;
 
-@Target({ElementType.FIELD})
+@Target({
+    ElementType.FIELD
+})
 @Retention(RetentionPolicy.RUNTIME)
 @Auxiliary
 public @interface CBLFixedLength {
-	public int value();
+  public int value();
 }

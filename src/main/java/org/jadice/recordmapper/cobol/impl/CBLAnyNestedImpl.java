@@ -40,31 +40,26 @@ public class CBLAnyNestedImpl extends FieldMapping {
   @Override
   public int getSize(MappingContext ctx) throws MappingException {
     if (!(ctx instanceof MarshalContext))
-      throw new MappingException(this,
-          "I am not supposed to know my size at this point");
+      throw new MappingException(this, "I am not supposed to know my size at this point");
 
-    return getComponentMapping(ctx).getSize(
-        ((MarshalContext) ctx).getMemberContext(ctx.getValue(field)));
+    return getComponentMapping(ctx).getSize(((MarshalContext) ctx).getMemberContext(ctx.getValue(field)));
   }
 
-  private RecordMapping getComponentMapping(MarshalContext ctx, Object value)
-      throws MappingException {
+  private RecordMapping getComponentMapping(MarshalContext ctx, Object value) throws MappingException {
     if (null != value) {
       final RecordMapping valueMapping = recordMapping.getRecordMapping(value.getClass());
-      if(null != valueMapping)
+      if (null != valueMapping)
         return valueMapping;
     }
-    
+
     return getComponentMapping(ctx);
   }
 
-  private RecordMapping getComponentMapping(MappingContext ctx)
-      throws MappingException {
+  private RecordMapping getComponentMapping(MappingContext ctx) throws MappingException {
     final Class<?> c = discriminator.getComponentType(ctx);
     final RecordMapping componentMapping = recordMapping.getRecordMapping(c);
     if (null == componentMapping)
-      throw new MappingException(this,
-          "Discriminator did not return a component type for " + field);
+      throw new MappingException(this, "Discriminator did not return a component type for " + field);
     return componentMapping;
   }
 
@@ -80,8 +75,7 @@ public class CBLAnyNestedImpl extends FieldMapping {
       final RecordMapping componentMapping = getComponentMapping(ctx);
 
       component = componentMapping.getRecordClass().newInstance();
-      final UnmarshalContext mc = ctx
-          .createMemberContext(component, componentMapping);
+      final UnmarshalContext mc = ctx.createMemberContext(component, componentMapping);
       componentMapping.unmarshal(component, mc);
 
       return component;
@@ -91,8 +85,7 @@ public class CBLAnyNestedImpl extends FieldMapping {
   }
 
   @Override
-  public void registerParameterField(FieldMapping param)
-      throws MappingException {
+  public void registerParameterField(FieldMapping param) throws MappingException {
     // we don't care, but let a size field have its way anyway.
   }
 

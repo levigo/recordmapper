@@ -26,7 +26,9 @@ public class CBLEnumImpl extends FieldMapping {
   private Enum<?> unknownValue;
 
   @Override
-  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @SuppressWarnings({
+      "rawtypes", "unchecked"
+  })
   protected void init(final Annotation a) throws MappingException {
     spec = (CBLEnum) a;
 
@@ -36,8 +38,7 @@ public class CBLEnumImpl extends FieldMapping {
     padding = new String(p);
 
     if (!Enum.class.isAssignableFrom(field.getType()))
-      throw new MappingException("The field " + field
-          + " must be an enum type to be mapped using @CBLEnum");
+      throw new MappingException("The field " + field + " must be an enum type to be mapped using @CBLEnum");
 
     try {
       final Method valuesM = field.getType().getMethod("values");
@@ -59,8 +60,7 @@ public class CBLEnumImpl extends FieldMapping {
         }
         
         if (cblValue.length() > spec.value())
-          throw new MappingException("The enum value " + cblValue
-              + " is longer than the allocated field length");
+          throw new MappingException("The enum value " + cblValue + " is longer than the allocated field length");
         
         enum2cblValues.put((Enum<?>) value, cblValue);
 
@@ -73,18 +73,15 @@ public class CBLEnumImpl extends FieldMapping {
         if (null != cblValues2enum)
           unknownValue = cblValues2enum.get(spec.unknownValue());
         else
-          unknownValue = Enum.valueOf((Class) field.getType(),
-              spec.unknownValue());
+          unknownValue = Enum.valueOf((Class) field.getType(), spec.unknownValue());
         if (null == unknownValue)
           throw new MappingException("The unknown value " + spec.unknownValue()
-              + " has no representation in the corresponding enum "
-              + field.getType());
+              + " has no representation in the corresponding enum " + field.getType());
       }
     } catch (final MappingException e) {
       throw e;
     } catch (final Exception e) {
-      throw new MappingException(
-          "Can't extract enum values from an enum implementing CBLEnumValue", e);
+      throw new MappingException("Can't extract enum values from an enum implementing CBLEnumValue", e);
     }
   }
 
@@ -100,8 +97,7 @@ public class CBLEnumImpl extends FieldMapping {
       if (!spec.nullValue().equals("#$#$NULL$#$#"))
         stringValue = spec.nullValue();
       else
-        throw new NullPointerException("The field " + field
-            + " must not contain a null value");
+        throw new NullPointerException("The field " + field + " must not contain a null value");
     else if (enum2cblValues.containsKey(value))
       stringValue = enum2cblValues.get(value);
     else
@@ -138,9 +134,7 @@ public class CBLEnumImpl extends FieldMapping {
       if (null != unknownValue)
         enumValue = unknownValue;
       else
-        throw new MappingException(
-            "The value '"
-                + s
+        throw new MappingException("The value '" + s
                 + "' cannot be mapped to a corresponding enum value and there is no unknown value defined.");
 
     return enumValue;

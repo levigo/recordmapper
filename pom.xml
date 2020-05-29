@@ -4,13 +4,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jadice.recordmapper</groupId>
   <artifactId>recordmapper</artifactId>
-  <version>1.1-SNAPSHOT</version>
+  <version>2.0-SNAPSHOT</version>
 
   <name>levigo record mapper</name>
   <inceptionYear>2015</inceptionYear>
   <description>A simple record mapper for mapping Java objects to legacy record formats</description>
   <url>https://github.com/levigo/recordmapper</url>
-  
+
   <organization>
     <name>levigo solutions GmbH</name>
   </organization>
@@ -53,15 +53,6 @@
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -84,6 +75,12 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.9.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

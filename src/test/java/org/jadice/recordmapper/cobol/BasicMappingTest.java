@@ -1,28 +1,24 @@
 package org.jadice.recordmapper.cobol;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.List;
 
 import org.jadice.recordmapper.BaseRecordAttributes;
 import org.jadice.recordmapper.MappingException;
 import org.jadice.recordmapper.MappingFactory;
 import org.jadice.recordmapper.Marshaller;
 import org.jadice.recordmapper.Unmarshaller;
-import org.jadice.recordmapper.cobol.TAnyOuter.EmptyNestedElement;
-import org.jadice.recordmapper.cobol.TAnyOuter.NameOnlyNestedElement;
-import org.jadice.recordmapper.cobol.TAnyOuter.NameValueNestedElement;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TestCBLMapping {
+public class BasicMappingTest extends AbstractMappingTest {
   @Test
   public void testPropertyBinaryLength() throws Exception {
     final MappingFactory mf = MappingFactory.create(TPropertyBinaryLength.class);
@@ -45,245 +41,27 @@ public class TestCBLMapping {
       assertEquals(value, p.value);
     }
   }
-  
+
   @Test
   public void testPropertyStringLength() throws Exception {
     final MappingFactory mf = MappingFactory.create(TPropertyStringLength.class);
-    
+
     for (int i = 0; i < 5; i++) {
       final String value = "Foo" + "ABCDEFGHI".substring(0, i);
-      
+
       TPropertyStringLength p = new TPropertyStringLength();
       p.name = "Foo";
       p.value = value;
-      
+
       final ByteArrayOutputStream os = new ByteArrayOutputStream();
       mf.createMarshaller().marshal(p, os);
-      
+
       final byte[] bytes = os.toByteArray();
-      
+
       p = mf.createUnmarshaller().unmarshal(TPropertyStringLength.class, new ByteArrayInputStream(bytes));
-      
+
       assertEquals("Foo", p.name);
       assertEquals(value, p.value);
-    }
-  }
-
-  @Test
-  public void testCollectionOfRecordsByBinaryCount() throws Exception {
-    final MappingFactory mf = MappingFactory.create(TPropertyCollectionByBinaryCount.class);
-
-    TPropertyCollectionByBinaryCount c = new TPropertyCollectionByBinaryCount();
-    c.properties = new ArrayList<TPropertyBinaryLength>();
-
-    fillProps(c.properties, TPropertyBinaryLength.class);
-
-    final ByteArrayOutputStream os = new ByteArrayOutputStream();
-    mf.createMarshaller().marshal(c, os);
-
-    final byte[] bytes = os.toByteArray();
-
-    c = mf.createUnmarshaller().unmarshal(TPropertyCollectionByBinaryCount.class, new ByteArrayInputStream(bytes));
-
-    assertEquals(5, c.count);
-
-    verifyProps(c.properties);
-  }
-
-  @Test
-  public void testCollectionOfRecordsByStringCount() throws Exception {
-    final MappingFactory mf = MappingFactory.create(TPropertyCollectionByStringCount.class);
-
-    TPropertyCollectionByStringCount c = new TPropertyCollectionByStringCount();
-    c.properties = new ArrayList<TPropertyStringLength>();
-
-    fillProps(c.properties, TPropertyStringLength.class);
-
-    final ByteArrayOutputStream os = new ByteArrayOutputStream();
-    mf.createMarshaller().marshal(c, os);
-
-    final byte[] bytes = os.toByteArray();
-
-    c = mf.createUnmarshaller().unmarshal(TPropertyCollectionByStringCount.class, new ByteArrayInputStream(bytes));
-
-    assertEquals(5, c.count);
-
-    verifyProps(c.properties);
-  }
-
-  @Test
-  public void testCollectionOfRecordsByBinarySize() throws Exception {
-    final MappingFactory mf = MappingFactory.create(TPropertyCollectionByBinarySize.class);
-
-    TPropertyCollectionByBinarySize c = new TPropertyCollectionByBinarySize();
-    c.properties = new ArrayList<TPropertyBinaryLength>();
-
-    fillProps(c.properties, TPropertyBinaryLength.class);
-
-    final ByteArrayOutputStream os = new ByteArrayOutputStream();
-    mf.createMarshaller().marshal(c, os);
-
-    final byte[] bytes = os.toByteArray();
-
-    c = mf.createUnmarshaller().unmarshal(TPropertyCollectionByBinarySize.class, new ByteArrayInputStream(bytes));
-
-    assertEquals(245, c.size);
-
-    verifyProps(c.properties);
-  }
-
-  @Test
-  public void testCollectionOfRecordsByStringSize() throws Exception {
-    final MappingFactory mf = MappingFactory.create(TPropertyCollectionByStringSize.class);
-
-    TPropertyCollectionByStringSize c = new TPropertyCollectionByStringSize();
-    c.properties = new ArrayList<TPropertyStringLength>();
-
-    fillProps(c.properties, TPropertyStringLength.class);
-
-    final ByteArrayOutputStream os = new ByteArrayOutputStream();
-    mf.createMarshaller().marshal(c, os);
-
-    final byte[] bytes = os.toByteArray();
-
-    c = mf.createUnmarshaller().unmarshal(TPropertyCollectionByStringSize.class, new ByteArrayInputStream(bytes));
-
-    assertEquals(245, c.size);
-
-    verifyProps(c.properties);
-  }
-
-  @Test
-  public void testArrayOfRecordsByBinaryCount() throws Exception {
-    final MappingFactory mf = MappingFactory.create(TPropertyArrayByBinaryCount.class);
-
-    TPropertyArrayByBinaryCount c = new TPropertyArrayByBinaryCount();
-    final ArrayList<TPropertyBinaryLength> list = new ArrayList<TPropertyBinaryLength>();
-    fillProps(list, TPropertyBinaryLength.class);
-    c.properties = list.toArray(new TPropertyBinaryLength[5]);
-
-    final ByteArrayOutputStream os = new ByteArrayOutputStream();
-    mf.createMarshaller().marshal(c, os);
-
-    final byte[] bytes = os.toByteArray();
-
-    c = mf.createUnmarshaller().unmarshal(TPropertyArrayByBinaryCount.class, new ByteArrayInputStream(bytes));
-
-    assertEquals(5, c.count);
-
-    verifyProps(Arrays.asList(c.properties));
-  }
-
-  @Test
-  public void testArrayOfRecordsByStringCount() throws Exception {
-    final MappingFactory mf = MappingFactory.create(TPropertyArrayByStringCount.class);
-
-    TPropertyArrayByStringCount c = new TPropertyArrayByStringCount();
-    final ArrayList<TPropertyStringLength> list = new ArrayList<TPropertyStringLength>();
-    fillProps(list, TPropertyStringLength.class);
-    c.properties = list.toArray(new TPropertyStringLength[5]);
-
-    final ByteArrayOutputStream os = new ByteArrayOutputStream();
-    mf.createMarshaller().marshal(c, os);
-
-    final byte[] bytes = os.toByteArray();
-
-    c = mf.createUnmarshaller().unmarshal(TPropertyArrayByStringCount.class, new ByteArrayInputStream(bytes));
-
-    assertEquals(5, c.count);
-
-    verifyProps(Arrays.asList(c.properties));
-  }
-
-  @Test
-  public void testArrayOfRecordsByBinarySize() throws Exception {
-    final MappingFactory mf = MappingFactory.create(TPropertyArrayByBinarySize.class);
-
-    TPropertyArrayByBinarySize c = new TPropertyArrayByBinarySize();
-    final ArrayList<TPropertyBinaryLength> list = new ArrayList<TPropertyBinaryLength>();
-    fillProps(list, TPropertyBinaryLength.class);
-    c.properties = list.toArray(new TPropertyBinaryLength[5]);
-
-    final ByteArrayOutputStream os = new ByteArrayOutputStream();
-    mf.createMarshaller().marshal(c, os);
-
-    final byte[] bytes = os.toByteArray();
-
-    c = mf.createUnmarshaller().unmarshal(TPropertyArrayByBinarySize.class, new ByteArrayInputStream(bytes));
-
-    assertEquals(245, c.size);
-
-    verifyProps(Arrays.asList(c.properties));
-  }
-
-  @Test
-  public void testArrayOfRecordsByStringSize() throws Exception {
-    final MappingFactory mf = MappingFactory.create(TPropertyArrayByStringSize.class);
-
-    TPropertyArrayByStringSize c = new TPropertyArrayByStringSize();
-    final ArrayList<TPropertyStringLength> list = new ArrayList<TPropertyStringLength>();
-    fillProps(list, TPropertyStringLength.class);
-    c.properties = list.toArray(new TPropertyStringLength[5]);
-
-    final ByteArrayOutputStream os = new ByteArrayOutputStream();
-    mf.createMarshaller().marshal(c, os);
-
-    final byte[] bytes = os.toByteArray();
-
-    c = mf.createUnmarshaller().unmarshal(TPropertyArrayByStringSize.class, new ByteArrayInputStream(bytes));
-
-    assertEquals(245, c.size);
-
-    verifyProps(Arrays.asList(c.properties));
-  }
-
-  @Test
-  public void testFixedLength() throws Exception {
-    final MappingFactory mf = MappingFactory.create(TPropertyFixedLengthCollection.class);
-
-    TPropertyFixedLengthCollection c = new TPropertyFixedLengthCollection();
-    c.properties = new ArrayList<TPropertyBinaryLength>();
-
-    fillProps(c.properties, TPropertyBinaryLength.class);
-    fillProps(c.properties, TPropertyBinaryLength.class);
-
-    try {
-      mf.createMarshaller().marshal(c, new ByteArrayOutputStream());
-      fail("Unexpected exception not thrown");
-    } catch (final MappingException e) {
-      // expected
-    }
-
-    c.properties = new ArrayList<TPropertyBinaryLength>();
-    fillProps(c.properties, TPropertyBinaryLength.class);
-
-    final ByteArrayOutputStream os = new ByteArrayOutputStream();
-    mf.createMarshaller().marshal(c, os);
-
-    final byte[] bytes = os.toByteArray();
-
-    c = mf.createUnmarshaller().unmarshal(TPropertyFixedLengthCollection.class, new ByteArrayInputStream(bytes));
-
-    verifyProps(c.properties);
-  }
-
-  private void verifyProps(final List<? extends TProperty> l) {
-    for (int i = 0; i < 5; i++) {
-      final String value = "Foo" + "ABCDEFGHI".substring(0, i);
-      assertEquals("Foo" + i, l.get(i).getName());
-      assertEquals(value, l.get(i).getValue());
-    }
-  }
-
-  private <T extends TProperty> void fillProps(final List<T> l, final Class<T> c) throws Exception {
-    for (int i = 0; i < 5; i++) {
-      final String value = "Foo" + "ABCDEFGHI".substring(0, i);
-
-      final T p = c.newInstance();
-      p.setName("Foo" + i);
-      p.setValue(value);
-
-      l.add(p);
     }
   }
 
@@ -336,6 +114,72 @@ public class TestCBLMapping {
       MappingFactory.create(FailingClass1.class);
     } catch (final MappingException e) {
       Assert.assertTrue(e.getCause().getMessage().contains("The enum value IXXI is longer than"));
+    }
+  }
+  
+  public enum MyEnumWithADuplicateValue {
+    @CBLEnumValue("FOO")
+    FOO, 
+    @CBLEnumValue("FOO")
+    BAR
+  }
+
+  @CBLRecord
+  public static class FailingClass2 {
+    @CBLEnum(3)
+    MyEnumWithADuplicateValue foo;
+  }
+
+  @Test
+  public void testFailingEnum2() throws Exception {
+    try {
+      MappingFactory.create(FailingClass2.class);
+    } catch (final MappingException e) {
+      Assert.assertThat(e.getCause().getMessage(), containsString("The enum value 'FOO' is used more than once at field"));
+    }
+  }
+  
+  public enum MyEnumWithAliasClashingWithField {
+    @CBLEnumValue("FOO")
+    FOO, 
+    @CBLEnumValue(value = "BAR", aliases = {"FOO"})
+    BAR
+  }
+  
+  @CBLRecord
+  public static class FailingClass3 {
+    @CBLEnum(3)
+    MyEnumWithAliasClashingWithField foo;
+  }
+  
+  @Test
+  public void testFailingEnum3() throws Exception {
+    try {
+      MappingFactory.create(FailingClass3.class);
+    } catch (final MappingException e) {
+      Assert.assertThat(e.getCause().getMessage(), containsString("The enum value alias 'FOO' is used more than once at field"));
+    }
+  }
+  
+  public enum MyEnumWithDuplicateAlias {
+    @CBLEnumValue(value = "FOO", aliases = {"BAZ"})
+    FOO, 
+    @CBLEnumValue(value = "BAR", aliases = {"BAZ"})
+    BAR
+  }
+  
+  @CBLRecord
+  public static class FailingClass4 {
+    @CBLEnum(3)
+    MyEnumWithDuplicateAlias foo;
+  }
+  
+  @Test
+  public void testFailingEnum4() throws Exception {
+    try {
+      MappingFactory.create(FailingClass4.class);
+    } catch (final MappingException e) {
+      Assert.assertThat(e.getCause().getMessage(), containsString("The enum value alias 'BAZ' is used more than once at field"));
     }
   }
 
@@ -422,7 +266,7 @@ public class TestCBLMapping {
   public void testUnknownValueWithoutCBLValues() throws Exception {
     final MappingFactory f = MappingFactory.create(EnumClass13.class);
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final EnumClass13 ec1out = u.unmarshal(EnumClass13.class, new ByteArrayInputStream("XYZ".getBytes()));
 
@@ -431,11 +275,14 @@ public class TestCBLMapping {
 
   // ******************************************************
   public enum MyEnumWithCBLValues {
-    @CBLEnumValue(value = "v_foo", aliases = {"v_as1", "v_as2"}) FOO,
-    @CBLEnumValue("v_bar") BAR,
-    @CBLEnumValue("v_baz") BAZ,
-    @CBLEnumValue("v_a") A,
-    @CBLEnumValue("v_bb") BB;
+    @CBLEnumValue(value = "v_foo", aliases = {
+        "v_as1", "v_as2"
+    })
+    FOO, @CBLEnumValue("v_bar")
+    BAR, @CBLEnumValue("v_baz")
+    BAZ, @CBLEnumValue("v_a")
+    A, @CBLEnumValue("v_bb")
+    BB;
   }
 
   @CBLRecord
@@ -448,10 +295,10 @@ public class TestCBLMapping {
   public void testEnumWithCBLValues() throws Exception {
     final MappingFactory f = MappingFactory.create(EnumClass2.class);
     final Marshaller m = f.createMarshaller();
-    m.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    m.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     for (final MyEnumWithCBLValues e : MyEnumWithCBLValues.values()) {
       final EnumClass2 ec = new EnumClass2();
@@ -522,7 +369,7 @@ public class TestCBLMapping {
   public void testUnknownValueWithCBLValues() throws Exception {
     final MappingFactory f = MappingFactory.create(EnumClass23.class);
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final EnumClass23 ec1out = u.unmarshal(EnumClass23.class, new ByteArrayInputStream("XYZ  ".getBytes()));
 
@@ -533,12 +380,12 @@ public class TestCBLMapping {
   public void testAliasesWithCBLValues() throws Exception {
     final MappingFactory f = MappingFactory.create(EnumClass23.class);
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
     
     Assert.assertEquals(MyEnumWithCBLValues.FOO, u.unmarshal(EnumClass23.class, new ByteArrayInputStream("v_as1".getBytes())).foo);
     Assert.assertEquals(MyEnumWithCBLValues.FOO, u.unmarshal(EnumClass23.class, new ByteArrayInputStream("v_as2".getBytes())).foo);
   }
-
+  
   // *****************************************
   @CBLRecord
   public static class MyTestClass1 {
@@ -557,7 +404,7 @@ public class TestCBLMapping {
     final MappingFactory f = MappingFactory.create(MyTestClass1.class);
     final Marshaller m = f.createMarshaller();
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final MyTestClass1 tc = new MyTestClass1();
 
@@ -589,7 +436,7 @@ public class TestCBLMapping {
     final MappingFactory f = MappingFactory.create(MyTestClass1.class);
     final Marshaller m = f.createMarshaller();
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final MyTestClass1 tc = new MyTestClass1();
 
@@ -658,7 +505,7 @@ public class TestCBLMapping {
     final MappingFactory f = MappingFactory.create(MyTestClass2.class);
     final Marshaller m = f.createMarshaller();
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final MyTestClass2 tc = new MyTestClass2();
     tc.mybyte = Byte.MAX_VALUE - 1;
@@ -717,7 +564,7 @@ public class TestCBLMapping {
     final MappingFactory f = MappingFactory.create(MyTestClass2.class);
     final Marshaller m = f.createMarshaller();
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final MyTestClass2 tc = new MyTestClass2();
 
@@ -745,17 +592,6 @@ public class TestCBLMapping {
     Assert.assertEquals(tcu.myDouble, new Double(0));
   }
 
-  ByteArrayOutputStream marshalAndVerify(final Marshaller m, final Object target, final String expected)
-      throws MappingException {
-    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    m.marshal(target, baos);
-
-    final String encoded = new String(baos.toByteArray());
-
-    Assert.assertEquals(expected, encoded);
-    return baos;
-  }
-
   // *****************************************
   @CBLRecord
   public static class MyTestClass4 {
@@ -768,12 +604,12 @@ public class TestCBLMapping {
     @CBLNumeric(4)
     Integer myInteger;
 
-    @CBLNumeric(value=8, signed=true)
+    @CBLNumeric(value = 8, signed = true)
     Long myLong;
 
     @CBLNumeric(1)
     byte dummy;
-    
+
     @CBLNumeric(1)
     byte mybyte;
 
@@ -783,7 +619,7 @@ public class TestCBLMapping {
     @CBLNumeric(4)
     int myint;
 
-    @CBLNumeric(value=8, signed=true)
+    @CBLNumeric(value = 8, signed = true)
     long mylong;
   }
 
@@ -792,7 +628,7 @@ public class TestCBLMapping {
     final MappingFactory f = MappingFactory.create(MyTestClass4.class);
     final Marshaller m = f.createMarshaller();
     final Unmarshaller u = f.createUnmarshaller();
-    u.getRecordAttributes(BaseRecordAttributes.class).setEncoding("ascii");
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
 
     final MyTestClass4 tc = new MyTestClass4();
     tc.mybyte = Byte.MAX_VALUE - 1;
@@ -814,8 +650,7 @@ public class TestCBLMapping {
     m.marshal(tc, baos);
 
 
-    Assert.assertEquals(
-        "7E7FFE7FFFFFFE7FFFFFFFFFFFFFFE007E7FFE7FFFFFFE7FFFFFFFFFFFFFFE",
+    Assert.assertEquals("7E7FFE7FFFFFFE7FFFFFFFFFFFFFFE007E7FFE7FFFFFFE7FFFFFFFFFFFFFFE",
         toHexString(baos.toByteArray()));
 
     final MyTestClass4 tcu = u.unmarshal(MyTestClass4.class, new ByteArrayInputStream(baos.toByteArray()));
@@ -864,59 +699,8 @@ public class TestCBLMapping {
       m.marshal(tc, new ByteArrayOutputStream());
       Assert.fail("Expected exception not thrown");
     } catch (final MappingException e) {
-      Assert.assertTrue(e.getMessage().contains(
-          "Length of value 4711 for field int org.jadice.recordmapper.cobol.TestCBLMapping$MyTestClass3.foo exceeds allowed length(3)"));
+      assertThat(e.getMessage()).startsWith(
+          "Length of value 4711 for field int " + MyTestClass3.class.getName() + ".foo exceeds allowed length (3)");
     }
-  }
-
-  @Test
-  public void testAnyMappingMarshalling() throws Exception {
-    final MappingFactory f = MappingFactory.create(TAnyOuter.class);
-
-    final TAnyOuter a1 = new TAnyOuter();
-
-    a1.type = 9;
-    a1.nested = new TAnyOuter.EmptyNestedElement();
-
-    marshalAndVerify(f.createMarshaller(), a1, "0");
-
-    final TAnyOuter a2 = new TAnyOuter();
-    a2.type = 9;
-    final TAnyOuter.NameOnlyNestedElement n = new TAnyOuter.NameOnlyNestedElement();
-    n.name = "foo";
-    a2.nested = n;
-
-    marshalAndVerify(f.createMarshaller(), a2, "1foo       ");
-
-    final TAnyOuter a3 = new TAnyOuter();
-    a3.type = 9;
-    final TAnyOuter.NameValueNestedElement nv = new TAnyOuter.NameValueNestedElement();
-    nv.name = "foo";
-    nv.value = "bar";
-    a3.nested = nv;
-
-    marshalAndVerify(f.createMarshaller(), a3, "2foo       bar       ");
-  }
-
-  @Test
-  public void testAnyMappingUnmarshalling() throws Exception {
-    final MappingFactory f = MappingFactory.create(TAnyOuter.class);
-
-    final TAnyOuter u1 = f.createUnmarshaller().unmarshal(TAnyOuter.class, new ByteArrayInputStream("0".getBytes()));
-    assertEquals(0, u1.type);
-    assertEquals(EmptyNestedElement.class, u1.nested.getClass());
-
-    final TAnyOuter u2 = f.createUnmarshaller().unmarshal(TAnyOuter.class,
-        new ByteArrayInputStream("1foo       ".getBytes()));
-    assertEquals(1, u2.type);
-    assertEquals(NameOnlyNestedElement.class, u2.nested.getClass());
-    assertEquals("foo", ((NameOnlyNestedElement) u2.nested).name);
-
-    final TAnyOuter u3 = f.createUnmarshaller().unmarshal(TAnyOuter.class,
-        new ByteArrayInputStream("2foo       bar       ".getBytes()));
-    assertEquals(2, u3.type);
-    assertEquals(NameValueNestedElement.class, u3.nested.getClass());
-    assertEquals("foo", ((NameValueNestedElement) u3.nested).name);
-    assertEquals("bar", ((NameValueNestedElement) u3.nested).value);
   }
 }

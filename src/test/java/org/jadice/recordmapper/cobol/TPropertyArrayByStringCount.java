@@ -2,9 +2,9 @@ package org.jadice.recordmapper.cobol;
 
 @CBLRecord
 public class TPropertyArrayByStringCount {
-	@CBLNumericString(4)
-	public int count;
+  @CBLNumericString(4)
+  public int count;
 
-	@CBLTable(countRef="count")
-	public TPropertyStringLength properties[];
+  @CBLTable(countRef = "count")
+  public TPropertyStringLength properties[];
 }

@@ -97,9 +97,6 @@ public class CBLTableImpl extends FieldMapping {
     if (spec.countRef().length() > 0) {
       sizeOrCountField = recordMapping.getFieldMapping(spec.countRef());
     }
-    
-    if(null == sizeOrCountField && fixedLength < 0)
-      throw new MappingException(this, "Must have either 'sizeRef', 'countRef' or a fixed length");
   }
 
   @Override
@@ -170,13 +167,12 @@ public class CBLTableImpl extends FieldMapping {
       }
     }
 
-    if (expectedSize < 0 && expectedCount < 0)
-      throw new MappingException(this, "Can't unmarshal table: neither have size nor count");
-
     final int startPos = ctx.getPosition();
     final List<Object> members = new ArrayList<Object>(expectedSize > 0 ? expectedSize : 0);
-    while ((expectedCount < 0 || members.size() < expectedCount)
-        && (expectedSize < 0 || ctx.getPosition() - startPos < expectedSize)) {
+    while ((expectedCount >= 0 && members.size() < expectedCount) // fixed count
+        || (expectedSize >= 0 && ctx.getPosition() - startPos < expectedSize) // fixed size
+        || (expectedSize < 0 && expectedCount < 0 && ctx.hasMore()) // unbounded
+    ) {
       try {
         final Object member = memberType.newInstance();
         final UnmarshalContext mc = ctx.createMemberContext(member, memberMapping);
