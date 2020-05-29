@@ -3,6 +3,7 @@ package org.jadice.recordmapper.cobol;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -115,7 +116,8 @@ public class BasicMappingTest extends AbstractMappingTest {
     try {
       MappingFactory.create(FailingClass1.class);
     } catch (final MappingException e) {
-      Assert.assertTrue(e.getCause().getMessage().contains("The enum value IXXI is longer than"));
+      e.printStackTrace();
+      assertThat(e.getCause().getMessage(), containsString("The enum value IXXI is longer than"));
     }
   }
   
@@ -137,7 +139,7 @@ public class BasicMappingTest extends AbstractMappingTest {
     try {
       MappingFactory.create(FailingClass2.class);
     } catch (final MappingException e) {
-      Assert.assertThat(e.getCause().getMessage(), containsString("The enum value 'FOO' is used more than once at field"));
+      assertThat(e.getCause().getMessage(), containsString("The enum value 'FOO' is used more than once at field"));
     }
   }
   
@@ -159,7 +161,7 @@ public class BasicMappingTest extends AbstractMappingTest {
     try {
       MappingFactory.create(FailingClass3.class);
     } catch (final MappingException e) {
-      Assert.assertThat(e.getCause().getMessage(), containsString("The enum value alias 'FOO' is used more than once at field"));
+      assertThat(e.getCause().getMessage(), containsString("The enum value alias 'FOO' is used more than once at field"));
     }
   }
   

@@ -40,14 +40,14 @@ public abstract class RecordMapping extends Mapping {
     return referencedClasses;
   }
 
-  public void postInit(Map<Class<?>, RecordMapping> mappings) throws MappingException {
+  public void postInit(final Map<Class<?>, RecordMapping> mappings) throws MappingException {
     recordMappings = mappings;
 
     for (final FieldMapping fm : fieldMappings)
       fm.postInit();
   }
 
-  public void setRecordClass(Class<?> c, Annotation recordAnnotation) throws MappingException {
+  public void setRecordClass(final Class<?> c, final Annotation recordAnnotation) throws MappingException {
     recordClass = c;
 
     assertCompatibility(c, recordAnnotation);
@@ -109,7 +109,7 @@ public abstract class RecordMapping extends Mapping {
       seeAlso = Arrays.asList(a.value());
   }
 
-  private void gatherFields(Class<?> c, List<Field> fields) {
+  private void gatherFields(final Class<?> c, final List<Field> fields) {
     if (null != c.getSuperclass())
       gatherFields(c.getSuperclass(), fields);
 
@@ -122,7 +122,7 @@ public abstract class RecordMapping extends Mapping {
 
   protected abstract void assertCompatibility(Class<?> c, Annotation recordAnnotation) throws MappingException;
 
-  public void marshal(Object record, MarshalContext mc) throws MappingException {
+  public void marshal(final Object record, final MarshalContext mc) throws MappingException {
     for (final Method m : beforeMarshal)
       try {
         m.invoke(record, (Object[]) null);
@@ -139,7 +139,7 @@ public abstract class RecordMapping extends Mapping {
     }
   }
 
-  public void unmarshal(Object record, UnmarshalContext mc) throws MappingException {
+  public void unmarshal(final Object record, final UnmarshalContext mc) throws MappingException {
     for (final FieldMapping fm : fieldMappings)
       mc.setValue(fm.getField(), fm.unmarshal(mc));
 
@@ -155,7 +155,7 @@ public abstract class RecordMapping extends Mapping {
   }
 
   @Override
-  public int getSize(MappingContext ctx) throws MappingException {
+  public int getSize(final MappingContext ctx) throws MappingException {
     int size = 0;
 
     for (final FieldMapping fm : fieldMappings)
@@ -164,15 +164,20 @@ public abstract class RecordMapping extends Mapping {
     return size;
   }
 
-  public FieldMapping getFieldMapping(String ref) {
+  public FieldMapping getFieldMapping(final String ref) {
     return fieldMappingsByName.get(ref);
   }
 
-  public RecordMapping getRecordMapping(Class<?> cls) {
+  public RecordMapping getRecordMapping(final Class<?> cls) {
     return recordMappings.get(cls);
   }
 
   public Class<?> getRecordClass() {
     return recordClass;
+  }
+  
+  @Override
+  public String toString() {
+    return recordClass.getName();
   }
 }

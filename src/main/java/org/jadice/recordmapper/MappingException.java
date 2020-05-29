@@ -9,7 +9,8 @@ public class MappingException extends Exception {
   private final List<Mapping> ctx = new LinkedList<Mapping>();
 
   public MappingException(final Mapping ctx, final String message, final Throwable cause) {
-    super(message, cause);
+    super(cause instanceof MappingException ? message + ": " + ((MappingException) cause).rawMessage() : message,
+        cause);
 
     if (cause instanceof MappingException)
       this.ctx.addAll(0, ((MappingException) cause).ctx);

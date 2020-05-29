@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jadice.recordmapper.Mapping;
 import org.jadice.recordmapper.MappingException;
 import org.jadice.recordmapper.cobol.CBLEnum;
 import org.jadice.recordmapper.cobol.CBLEnumValue;
@@ -16,6 +17,23 @@ import org.jadice.recordmapper.impl.MarshalContext;
 import org.jadice.recordmapper.impl.UnmarshalContext;
 
 public class CBLEnumImpl extends FieldMapping {
+  private static class EnumValueMapping extends Mapping {
+    private final Field field;
+
+    public EnumValueMapping(final Field enumValueField) {
+      this.field = enumValueField;
+    }
+
+    @Override
+    public int getSize(final MappingContext ctx) throws MappingException {
+      return 0;
+    }
+    
+    @Override
+    public String toString() {
+      return field.getDeclaringClass().getSimpleName() + "." + field.getName();
+    }
+  }
   private String padding;
 
   private CBLEnum spec;
@@ -61,12 +79,12 @@ public class CBLEnumImpl extends FieldMapping {
         }
 
         if (cblValue.length() > spec.value())
-          throw new MappingException(this, "The enum value " + cblValue + " is longer than the allocated field length");
+          throw new MappingException(new EnumValueMapping(enumValueField), "The enum value " + cblValue + " is longer than the allocated field length");
 
         enum2cblValues.put((Enum<?>) value, cblValue);
 
         if (cblValues2enum.containsKey(cblValue))
-          throw new MappingException(this,
+          throw new MappingException(new EnumValueMapping(enumValueField),
               "The enum value '" + cblValue + "' is used more than once at field " + field);
         cblValues2enum.put(cblValue, (Enum<?>) enumValue);
       }
