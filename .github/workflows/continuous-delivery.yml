@@ -69,7 +69,7 @@ jobs:
             GPG_EXECUTABLE: gpg
             GPG_SECRET_KEYS: ${{ secrets.LEVIGO_GPG_KEYS }}
             GPG_OWNERTRUST: ${{ secrets.LEVIGO_GPG_OWNERTRUST }}
-            
+            GPG_PASSPHRASE: ${{ secrets.LEVIGO_GPG_PASSPHRASE }}
       run: |
         echo "$GPG_SECRET_KEYS" | base64 --decode | $GPG_EXECUTABLE --import --no-tty --batch --yes
         echo "$GPG_OWNERTRUST" | base64 --decode | $GPG_EXECUTABLE --import-ownertrust --no-tty --batch --yes
