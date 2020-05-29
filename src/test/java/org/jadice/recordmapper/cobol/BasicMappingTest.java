@@ -1,7 +1,8 @@
 package org.jadice.recordmapper.cobol;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -115,6 +116,72 @@ public class BasicMappingTest extends AbstractMappingTest {
       Assert.assertTrue(e.getCause().getMessage().contains("The enum value IXXI is longer than"));
     }
   }
+  
+  public enum MyEnumWithADuplicateValue {
+    @CBLEnumValue("FOO")
+    FOO, 
+    @CBLEnumValue("FOO")
+    BAR
+  }
+
+  @CBLRecord
+  public static class FailingClass2 {
+    @CBLEnum(3)
+    MyEnumWithADuplicateValue foo;
+  }
+
+  @Test
+  public void testFailingEnum2() throws Exception {
+    try {
+      MappingFactory.create(FailingClass2.class);
+    } catch (final MappingException e) {
+      Assert.assertThat(e.getCause().getMessage(), containsString("The enum value 'FOO' is used more than once at field"));
+    }
+  }
+  
+  public enum MyEnumWithAliasClashingWithField {
+    @CBLEnumValue("FOO")
+    FOO, 
+    @CBLEnumValue(value = "BAR", aliases = {"FOO"})
+    BAR
+  }
+  
+  @CBLRecord
+  public static class FailingClass3 {
+    @CBLEnum(3)
+    MyEnumWithAliasClashingWithField foo;
+  }
+  
+  @Test
+  public void testFailingEnum3() throws Exception {
+    try {
+      MappingFactory.create(FailingClass3.class);
+    } catch (final MappingException e) {
+      Assert.assertThat(e.getCause().getMessage(), containsString("The enum value alias 'FOO' is used more than once at field"));
+    }
+  }
+  
+  public enum MyEnumWithDuplicateAlias {
+    @CBLEnumValue(value = "FOO", aliases = {"BAZ"})
+    FOO, 
+    @CBLEnumValue(value = "BAR", aliases = {"BAZ"})
+    BAR
+  }
+  
+  @CBLRecord
+  public static class FailingClass4 {
+    @CBLEnum(3)
+    MyEnumWithDuplicateAlias foo;
+  }
+  
+  @Test
+  public void testFailingEnum4() throws Exception {
+    try {
+      MappingFactory.create(FailingClass4.class);
+    } catch (final MappingException e) {
+      Assert.assertThat(e.getCause().getMessage(), containsString("The enum value alias 'BAZ' is used more than once at field"));
+    }
+  }
 
   // ******************************************************
   public enum MyEnumWithoutCBLValues {
@@ -208,7 +275,9 @@ public class BasicMappingTest extends AbstractMappingTest {
 
   // ******************************************************
   public enum MyEnumWithCBLValues {
-    @CBLEnumValue("v_foo")
+    @CBLEnumValue(value = "v_foo", aliases = {
+        "v_as1", "v_as2"
+    })
     FOO, @CBLEnumValue("v_bar")
     BAR, @CBLEnumValue("v_baz")
     BAZ, @CBLEnumValue("v_a")
@@ -306,7 +375,17 @@ public class BasicMappingTest extends AbstractMappingTest {
 
     Assert.assertEquals(MyEnumWithCBLValues.BAZ, ec1out.foo);
   }
-
+  
+  @Test
+  public void testAliasesWithCBLValues() throws Exception {
+    final MappingFactory f = MappingFactory.create(EnumClass23.class);
+    final Unmarshaller u = f.createUnmarshaller();
+    u.getRecordAttributes(BaseRecordAttributes.class).setCharset(StandardCharsets.US_ASCII);
+    
+    Assert.assertEquals(MyEnumWithCBLValues.FOO, u.unmarshal(EnumClass23.class, new ByteArrayInputStream("v_as1".getBytes())).foo);
+    Assert.assertEquals(MyEnumWithCBLValues.FOO, u.unmarshal(EnumClass23.class, new ByteArrayInputStream("v_as2".getBytes())).foo);
+  }
+  
   // *****************************************
   @CBLRecord
   public static class MyTestClass1 {
@@ -589,7 +668,7 @@ public class BasicMappingTest extends AbstractMappingTest {
     Assert.assertEquals(tcu.myLong, new Long(Long.MAX_VALUE - 1));
   }
 
-  private static String toHexString(byte[] b) {
+  private static String toHexString(final byte[] b) {
     StringBuilder buf = new StringBuilder();
     for (int i = 0; i < b.length; i++) {
       String s = Integer.toHexString(b[i] & 0xff).toUpperCase();

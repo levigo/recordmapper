@@ -29,7 +29,7 @@ public class CBLEnumImpl extends FieldMapping {
   @SuppressWarnings({
       "rawtypes", "unchecked"
   })
-  protected void init(Annotation a) throws MappingException {
+  protected void init(final Annotation a) throws MappingException {
     spec = (CBLEnum) a;
 
     final char p[] = new char[spec.value()];
@@ -45,18 +45,28 @@ public class CBLEnumImpl extends FieldMapping {
       final Object values[] = (Object[]) valuesM.invoke(null);
 
       for (final Object value : values) {
-        String cblValue = ((Enum<?>) value).name();
+        Enum<?> enumValue = (Enum<?>) value;
+        String cblValue = enumValue.name();
         final Field enumValueField = field.getType().getField(cblValue);
         final CBLEnumValue v = enumValueField.getAnnotation(CBLEnumValue.class);
-        if (null != v) {
+        if(null != v) {
           cblValue = v.value();
-          enum2cblValues.put((Enum<?>) value, cblValue);
+          
+          for(String alias : v.aliases()) {
+            if(cblValues2enum.containsKey(alias))
+                throw new MappingException("The enum value alias '" + alias + "' is used more than once at field " + field);
+            cblValues2enum.put(alias, (Enum<?>) enumValue);
+          }
         }
-
+        
         if (cblValue.length() > spec.value())
           throw new MappingException("The enum value " + cblValue + " is longer than the allocated field length");
+        
+        enum2cblValues.put((Enum<?>) value, cblValue);
 
-        cblValues2enum.put(cblValue, (Enum<?>) value);
+        if(cblValues2enum.containsKey(cblValue))
+            throw new MappingException("The enum value '" + cblValue + "' is used more than once at field " + field);
+        cblValues2enum.put(cblValue, (Enum<?>) enumValue);
       }
 
       if (!spec.unknownValue().equals("#$#$UNKNOWN$#$#")) {
@@ -76,12 +86,12 @@ public class CBLEnumImpl extends FieldMapping {
   }
 
   @Override
-  public int getSize(MappingContext ctx) {
+  public int getSize(final MappingContext ctx) {
     return spec.value();
   }
 
   @Override
-  public void marshal(MarshalContext ctx, Object value) throws MappingException {
+  public void marshal(final MarshalContext ctx, final Object value) throws MappingException {
     String stringValue;
     if (value == null)
       if (!spec.nullValue().equals("#$#$NULL$#$#"))
@@ -96,7 +106,7 @@ public class CBLEnumImpl extends FieldMapping {
     ctx.put(adjustLength(stringValue, ctx));
   }
 
-  private String adjustLength(String value, MappingContext ctx) {
+  private String adjustLength(String value, final MappingContext ctx) {
     final int expected = getSize(ctx);
     int actual = value.length();
 
@@ -113,7 +123,7 @@ public class CBLEnumImpl extends FieldMapping {
   }
 
   @Override
-  public Object unmarshal(UnmarshalContext ctx) throws MappingException {
+  public Object unmarshal(final UnmarshalContext ctx) throws MappingException {
     final String s = ctx.getString(getSize(ctx)).trim();
 
     if (!spec.nullValue().equals("#$#$NULL$#$#") && spec.nullValue().equals(s))
@@ -125,7 +135,7 @@ public class CBLEnumImpl extends FieldMapping {
         enumValue = unknownValue;
       else
         throw new MappingException("The value '" + s
-            + "' cannot be mapped to a corresponding enum value and there is no unknown value defined.");
+                + "' cannot be mapped to a corresponding enum value and there is no unknown value defined.");
 
     return enumValue;
   }
