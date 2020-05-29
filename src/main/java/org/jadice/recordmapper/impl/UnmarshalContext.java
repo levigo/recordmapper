@@ -23,7 +23,7 @@ public interface UnmarshalContext extends MappingContext {
    * Return whether any unconsumed input is available
    * 
    * @return <code>true</code> if there is more input, <code>false</code> at EOF
-   * @throws MappingException
+   * @throws MappingException if tesing for more input failed
    */
   boolean hasMore() throws MappingException;
 }

@@ -25,6 +25,7 @@ public @interface CBLDate {
    * formatting with formats which would otherwise throw a {@link UnsupportedTemporalTypeException}.
    * Valid values are the ones accepted by {@link ZoneId#of(String)} as well as {@value #DEFAULT_ZONE}
    * to use the {@link ZoneId#systemDefault()}.
+   * @return a zone id
    */
   public String zoneId() default "";
 
@@ -32,6 +33,7 @@ public @interface CBLDate {
    * Specify the name of a {@link ZoneOffset} to use in conjunction with {@link Instant}s when
    * formatting with formats which would otherwise throw a {@link UnsupportedTemporalTypeException}.
    * Valid values are the ones accepted by {@link ZoneOffset#of(String)}.
+   * @return a zone offset
    */
   public String zoneOffset() default "";
 }

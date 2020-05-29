@@ -8,6 +8,7 @@ public class BaseRecordAttributes implements RecordAttributes {
 
   /**
    * @deprecated use {@link #getCharset()} instead.
+   * @return the encoding as a string
    */
   @Deprecated
   public String getEncoding() {
@@ -16,9 +17,10 @@ public class BaseRecordAttributes implements RecordAttributes {
 
   /**
    * @deprecated use {@link #setCharset(Charset)} instead.
+   * @param encoding the encoding as a string 
    */
   @Deprecated
-  public void setEncoding(String encoding) {
+  public void setEncoding(final String encoding) {
     this.charset = Charset.forName(encoding);
   }
   
@@ -26,7 +28,7 @@ public class BaseRecordAttributes implements RecordAttributes {
     return charset;
   }
   
-  public void setCharset(Charset charset) {
+  public void setCharset(final Charset charset) {
     this.charset = charset;
   }
 }

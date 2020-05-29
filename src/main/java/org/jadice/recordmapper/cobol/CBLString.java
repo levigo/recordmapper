@@ -16,6 +16,7 @@ public @interface CBLString {
 
   /**
    * Whether to silently truncate values that are too long.
+   * @return <code>true</code> if the value should be truncated
    */
   public boolean truncate() default false;
 }
