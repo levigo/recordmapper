@@ -10,19 +10,19 @@ on:
       
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
-    - name: Bump version and push tag
+    - name: Bump version and create tag
       id: semanticversion
-      uses: hennejg/github-tag-action@v4.1.jh5
+      uses: mathieudutour/github-tag-action@v6.2
       with:
         release_branches: master
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        
+        fetch_all_tags: true
+
     - name: Verify and print new build number
       run: |
         if echo '${{ steps.semanticversion.outputs.new_tag }}' |grep -Eq '^v[0-9]+[.][0-9]+[.][0-9]+$'; then 
@@ -32,21 +32,13 @@ jobs:
           exit -1
         fi
 
-    ## Enable Caching
-    - uses: actions/cache@v4
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-
-    ## Configure JDK 11
     - name: Set up JDK 11
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v4
       with:
-        java-version: 11
+        java-version: '11'
+        distribution: 'temurin'
+        cache: 'maven'
 
-    ## Build with maven
     - name: Prepare maven settings
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -66,12 +58,12 @@ jobs:
     ## Deploy
     - name: Deploy package
       env:
-            GPG_EXECUTABLE: gpg
-            GPG_SECRET_KEYS: ${{ secrets.LEVIGO_GPG_KEYS }}
-            GPG_OWNERTRUST: ${{ secrets.LEVIGO_GPG_OWNERTRUST }}
-            GPG_PASSPHRASE: ${{ secrets.LEVIGO_GPG_PASSPHRASE }}
-            SONATYPE_USERNAME: ${{ secrets.LEVIGO_SONATYPE_USERNAME }}
-            SONATYPE_PASSWORD: ${{ secrets.LEVIGO_SONATYPE_PASSWORD }}
+        GPG_EXECUTABLE: gpg
+        GPG_SECRET_KEYS: ${{ secrets.LEVIGO_GPG_KEYS }}
+        GPG_OWNERTRUST: ${{ secrets.LEVIGO_GPG_OWNERTRUST }}
+        GPG_PASSPHRASE: ${{ secrets.LEVIGO_GPG_PASSPHRASE }}
+        SONATYPE_USERNAME: ${{ secrets.LEVIGO_SONATYPE_USERNAME }}
+        SONATYPE_PASSWORD: ${{ secrets.LEVIGO_SONATYPE_PASSWORD }}
       run: |
         echo "$GPG_SECRET_KEYS" | base64 --decode | $GPG_EXECUTABLE --import --no-tty --batch --yes
         echo "$GPG_OWNERTRUST" | base64 --decode | $GPG_EXECUTABLE --import-ownertrust --no-tty --batch --yes
@@ -98,13 +90,15 @@ jobs:
         branch: master
         github_token: ${{ secrets.GITHUB_TOKEN }}    
         
-    ## Notify Slack
-    - name: Notify slack
-      uses: hennejg/slack-build-notifier@v1.1
+    - name: Notify Developers
+      uses: 8398a7/action-slack@v3
       with:
         username: GitHub
         icon_emoji: octocat
+        channel: ci_project
+        status: ${{ job.status }}
+        fields: repo,message,commit,author,action,eventName,ref
         text: Released new version `${{ steps.semanticversion.outputs.new_version }}` of *${{ github.repository }}* to ${{ secrets.REPOSITORY_URL }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: always()
