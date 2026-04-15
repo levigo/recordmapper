@@ -1,3 +1,14 @@
+
+# Archived Repository
+
+**⚠️ This repository has been archived and is no longer actively maintained or developed. ⚠️**
+
+No further development will take place on this project.
+
+## Why was this repository archived?
+
+- This repository has been archived because no further development or updates will be made. The project is considered complete and is no longer actively maintained.
+
 # Overview
 
 A simple record mapper for mapping Java objects to legacy record formats. Currently the only supported format
